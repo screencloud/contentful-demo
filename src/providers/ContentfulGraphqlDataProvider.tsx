@@ -1,12 +1,12 @@
-import React, { ReactNode, useContext, useMemo } from "react";
+import React, { ReactNode, useContext } from "react";
 import { QueryClientProvider, QueryClient } from "react-query";
+import * as types from "@contentful/rich-text-types";
 import { SCREEN_CLOUD_CTX } from "../service/screencloud-config/screecloud-ctx";
 import {
   useScContentMapping,
   useMappedData,
   ImageAsset,
 } from "../service/screencloud-config/sc-content-mapping-service";
-import * as types from "@contentful/rich-text-types";
 
 const queryClient = new QueryClient();
 
@@ -15,31 +15,43 @@ export const Quotes = "quotes";
 export const Products = "products";
 export const Heroes = "heroes";
 
+type ContentfulType =
+  | typeof Blog
+  | typeof Quotes
+  | typeof Products
+  | typeof Heroes;
+
 export interface ContentfulBlogItem {
   title: string;
   link: string;
   description: { json: types.Document };
-  copyright: string;
-  image: ImageAsset;
+  author: string;
+  image?: ImageAsset;
   pubDate?: string;
 }
 
 export interface ContentfulQuoteItem {
   image?: ImageAsset;
   text: { json: types.Document };
+  author: string;
 }
 export interface ContentfulProductItem {
+  id: string;
+  brand: string;
   price: number;
-  productImage: ImageAsset;
-  productName: string;
-  productCategory: { json: types.Document };
+  comparePrice: number;
+  type: string;
+  image: ImageAsset;
+  name: string;
+  link: string;
 }
 
 export interface ContentfulHeroItem {
   headline: string;
-  image: ImageAsset;
-  paragraph: { json: types.Document };
-  slug: string;
+  image?: ImageAsset;
+  paragraph?: { json: types.Document };
+  link?: string;
+  color: string;
 }
 
 export type ContentfulDataItem =
@@ -64,42 +76,61 @@ export interface Contentful {
   data?: ContentfulDataItem;
   loading: boolean;
   error: unknown;
-  fetchBlogPosts: () => Promise<void>;
 }
 
 interface Props {
   children: ReactNode;
-  type: string;
+  mapName: string;
+  playlistId: string;
 }
 
 const initialState = {
   data: undefined,
   loading: false,
   error: undefined,
-  fetchBlogPosts: () => Promise.resolve(),
+};
+
+const getType = (layout: string): ContentfulType => {
+  switch (layout) {
+    case "quotes":
+      return "quotes";
+    case "blog":
+      return "blog";
+    case "products":
+      return "products";
+    case "heroes":
+    default:
+      return "heroes";
+  }
 };
 
 export const ContentfulDataContext =
   React.createContext<Contentful>(initialState);
 
 function Container(props: Props) {
-  const scContentMappingQuery = useScContentMapping({ name: "Demo" });
-  const heroContentMapping = useMemo(
-    () =>
-      scContentMappingQuery.data?.screenCloudContentMappingCollection.items[0]
-        .mappingConfig?.[props.type],
-    [scContentMappingQuery.data, props.type]
-  );
-  const { isLoading, error, result, refetch } =
-    useMappedData(heroContentMapping);
+  const scContentMappingQuery = useScContentMapping({
+    id: props.playlistId,
+    name: props.mapName,
+  });
+
+  const mapping =
+    scContentMappingQuery.data?.contentFeed?.contentMappingConfig.config;
+  const filterItems =
+    scContentMappingQuery.data?.contentFeed?.entriesCollection.items;
+
+  const {
+    queryResponse: { isLoading, error },
+    result,
+  } = useMappedData(mapping, filterItems);
+
+  const type = getType(mapping?.name || "");
 
   return (
     <ContentfulDataContext.Provider
       value={{
         loading: isLoading,
         error,
-        // @ts-ignore
-        data: { items: result || [], type: props.type },
+        data: { items: result || [], type },
       }}
     >
       {props.children}
@@ -111,24 +142,27 @@ export const ContentfulGraphqlDataProvider = ({
   children,
   apiKey,
   spaceId,
-  type,
+  mapName = "",
+  playlistId = "",
 }: {
   apiKey?: string;
   spaceId?: string;
-  type: string;
+  mapName: string;
+  playlistId: string;
   children: ReactNode;
-}) => {
+}): JSX.Element => {
   return (
     <QueryClientProvider client={queryClient}>
       <SCREEN_CLOUD_CTX.Provider
         value={{ cfApiKey: apiKey, cfSpaceId: spaceId }}
       >
-        <Container type={type}>{children}</Container>
+        <Container mapName={mapName} playlistId={playlistId}>
+          {children}
+        </Container>
       </SCREEN_CLOUD_CTX.Provider>
     </QueryClientProvider>
   );
 };
 
 export const useContentful = (): Contentful =>
-  // @ts-ignore
   useContext(ContentfulDataContext);

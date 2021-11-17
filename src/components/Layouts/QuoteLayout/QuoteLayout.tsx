@@ -38,7 +38,7 @@ export const QuoteLayout: FunctionComponent<Props> = (
       borderColor={themeColor}
       leftContent={
         <FullScreenImage
-          url={item.image?.url}
+          url={item.image?.url || ""}
           itemDurationSeconds={itemDurationSeconds}
         />
       }

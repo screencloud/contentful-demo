@@ -5,17 +5,14 @@ import React, {
   useEffect,
 } from "react";
 import {
+  Box,
   ContentWrapper,
   Flex,
   theme,
   Text,
   TextSizes,
-  Box,
-  Progress,
-  QRCode,
 } from "@screencloud/alfie-alpha";
 import { ContentfulProductItem } from "../../../providers/ContentfulGraphqlDataProvider";
-import { RichText } from "../../RichText/rich-text";
 
 interface Props {
   itemDurationSeconds: number;
@@ -27,7 +24,7 @@ interface Props {
 export const ProductRightContent: FunctionComponent<Props> = (
   props: Props
 ): ReactElement<Props> => {
-  const { itemDurationSeconds, item, progressBarColor } = props;
+  const { item } = props;
 
   const [key, setKey] = useState(Date.now());
 
@@ -44,22 +41,23 @@ export const ProductRightContent: FunctionComponent<Props> = (
         height="100%"
       >
         <Flex
+          flexGrow={1}
           overflow="hidden"
           flexDirection="row"
           justifyContent="left"
           width="100%"
         >
           <Text
-            type={TextSizes.H4}
+            type={TextSizes.H3}
             color={theme.colors.black}
             wordBreak="break-word"
-            fontFamily={"sans-serif"}
-            fontWeight={theme.fontWeights.black}
-            paddingBottom={{ _: 4, lg: 7 }}
+            fontFamily={theme.fonts.normal}
+            fontWeight={theme.fontWeights.bold}
           >
-            {item.productName}
+            {item.brand}
           </Text>
         </Flex>
+
         <Flex
           overflow="hidden"
           flexDirection="row"
@@ -67,31 +65,102 @@ export const ProductRightContent: FunctionComponent<Props> = (
           width="100%"
         >
           <Text
-            type={TextSizes.H4}
-            color={theme.colors.black}
+            type={TextSizes.H1}
+            color="#2d313b"
             wordBreak="break-word"
-            fontFamily={"sans-serif"}
-            fontWeight={theme.fontWeights.black}
-            paddingBottom={{ _: 4, lg: 7 }}
+            fontFamily={theme.fonts.normal}
+            fontWeight={theme.fontWeights.bold}
           >
-            <RichText document={item.productCategory.json} />
+            {item.name.toUpperCase()}
           </Text>
         </Flex>
+
+        <Flex
+          overflow="hidden"
+          flexDirection="row"
+          justifyContent="left"
+          width="100%"
+          paddingBottom={{ _: 4, lg: 7 }}
+        >
+          <Box marginRight={{ _: 2 }}>
+            <Text
+              type={TextSizes.SmallP}
+              color="#777"
+              wordBreak="break-word"
+              fontFamily={theme.fonts.normal}
+              fontWeight={theme.fontWeights.normal}
+              paddingBottom={{ _: 4, lg: 7 }}
+            >
+              {item.type}
+            </Text>
+          </Box>
+          <Text
+            type={TextSizes.SmallP}
+            color="#777"
+            wordBreak="break-word"
+            fontFamily={theme.fonts.normal}
+            fontWeight={theme.fontWeights.normal}
+            paddingBottom={{ _: 4, lg: 7 }}
+          >
+            {item.id}
+          </Text>
+        </Flex>
+
         <Flex
           flexGrow={1}
           flexDirection="row"
           flexWrap="wrap"
-          justifyContent="center"
-          alignItems="center"
+          justifyContent="left"
+          alignItems="start"
         >
-          <Text
-            type={TextSizes.SmallP}
-            wordBreak="break-word"
-            fontFamily={"sans-serif"}
-            paddingBottom={{ _: 4, lg: 7 }}
+          <Flex
+            flexDirection="column"
+            flexWrap="wrap"
+            justifyContent="left"
+            alignItems="start"
           >
-            {item.price}
-          </Text>
+            <Text
+              type={TextSizes.H1}
+              wordBreak="break-word"
+              fontFamily={theme.fonts.normal}
+              fontWeight={theme.fontWeights.bold}
+              color="#2d313b"
+            >
+              £{item.price}
+            </Text>
+            {item.comparePrice > item.price && (
+              <Text
+                type={TextSizes.P}
+                wordBreak="break-word"
+                color="#777"
+                fontFamily={theme.fonts.normal}
+                fontWeight={theme.fontWeights.normal}
+              >
+                was £{item.comparePrice}
+              </Text>
+            )}
+          </Flex>
+
+          {item.comparePrice > item.price && (
+            <Flex
+              bg="#ffd900"
+              borderRadius="100%"
+              minWidth="175px"
+              minHeight="175px"
+              justifyContent="center"
+              alignItems="center"
+              marginLeft={{ _: 2 }}
+            >
+              <Text
+                type={TextSizes.H4}
+                fontFamily={theme.fonts.normal}
+                textAlign="center"
+              >
+                save
+                <br />£{item.comparePrice - item.price}
+              </Text>
+            </Flex>
+          )}
         </Flex>
       </Flex>
     </ContentWrapper>

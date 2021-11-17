@@ -1,14 +1,14 @@
 import { useMemo } from "react";
+import { UseQueryResult } from "react-query";
 import { capitalize } from "./string-utils";
 import {
   ContentfulCollection,
   useGqlQuery,
 } from "../../service/graphql-service";
 import {
-  ScAppMapping,
   scContentMappingByNameGql,
-  scContentMappingCollectionGql,
   ScContentMappingCollectionResponse,
+  ScreenCloudContentMapping,
 } from "./sc-content-mapping.queries";
 
 export interface ImageAsset {
@@ -22,43 +22,65 @@ export interface ImageAsset {
   url: string;
 }
 
-export function mapContent(
-  mappingConfig: ScAppMapping,
-  data: Array<Record<string, any>>
+function mapLink(baseUrl?: string, slug?: string) {
+  if (!baseUrl || !slug) {
+    return {};
+  }
+  return { link: `${baseUrl}/${slug}` };
+}
+
+function filterContent(
+  data: Array<Record<string, any>>,
+  filterItems: { sys: { id: string } }[]
 ) {
-  return data.map((dataItem) => {
-    const mappingEntries = Object.entries(mappingConfig?.mapping || {});
+  return data.filter((item) =>
+    filterItems.some((filterItem) => filterItem.sys.id === item.sys.id)
+  );
+}
+
+export function mapContent(
+  mappingConfig: ScreenCloudContentMapping,
+  filterItems: { sys: { id: string } }[],
+  data: Array<Record<string, any>>
+): any[] {
+  return filterContent(data, filterItems).map((dataItem) => {
+    const mappingEntries = Object.entries(mappingConfig.mapping || {});
 
     /** for every mapping entry we get the data out of the contentful entry */
-    return mappingEntries.reduce((acc, mapEntry) => {
+    const mappedEntries = mappingEntries.reduce((acc, mapEntry) => {
       const [fieldName, path] = mapEntry;
-      // console.log(`loooking for`, fieldName, `at`, path);
       const pathSegments = path.split(".");
       const value = pathSegments.reduce(
         (dataItemSegment, pathSegment, i, arr) => {
           if (!dataItemSegment) {
             return dataItemSegment;
           }
-          const [segmentName, segmentType] = pathSegment.split(":");
+          const [segmentName] = pathSegment.split(":");
           // const isLast = i === arr.length - 1;
           return dataItemSegment[segmentName];
         },
-        dataItem as any
+        dataItem
       );
 
       return { ...acc, [fieldName]: value };
     }, {} as any);
+
+    return {
+      ...mappedEntries,
+      ...mapLink(mappingConfig.constants?.baseUrl, mappedEntries.slug),
+    };
   });
 }
 
-export function queryStringFromAppMapping(mappingConfig: ScAppMapping) {
-  // console.log(`mapping`, mapping)
-  const entries = Object.entries(mappingConfig.mapping);
+export function queryStringFromAppMapping(
+  mapping: Record<string, string>,
+  contentType: string
+): string {
+  const entries = Object.entries(mapping);
 
   const itemsQueryString = entries?.reduce((itemsString, entry) => {
-    const [_, path] = entry;
+    const path = entry[1];
     const segments = path.split(".");
-    // console.log(`segment`, path, segments)
 
     const singleItemString = [...segments]
       .reverse()
@@ -81,19 +103,24 @@ export function queryStringFromAppMapping(mappingConfig: ScAppMapping) {
         }
 
         /** if parent has a type we wrap our field with an inline fragment: */
-        const [_, prevType] = i < arr.length - 1 ? arr[i + 1]?.split(`:`) : [];
+        const item = i < arr.length - 1 ? arr[i + 1]?.split(`:`) : [];
+        const prevType = item[1];
         if (prevType) {
-          str = `... on ${capitalize(prevType)} { ${str} }`;
+          const prevTypes = prevType.split(`|`);
+          str = prevTypes
+            .map((p) => `...on ${capitalize(p)} { ${str} }`)
+            .join(` `);
+          // str = `... on ${capitalize(prevType)} { ${str} }`;
         }
 
         return str;
       }, ``);
 
-    return `${itemsString}${singleItemString} `;
+    return `${itemsString}${singleItemString} sys { id }`;
   }, ``);
 
   const queryString = `query {
-    ${mappingConfig?.contentType}Collection(limit: 20) {
+    ${contentType}Collection(limit: 20) {
       items {
         ${itemsQueryString}
       }
@@ -110,44 +137,54 @@ export function queryStringFromAppMapping(mappingConfig: ScAppMapping) {
     title
     url
   }`;
-  // console.log(queryString);
   return queryString;
 }
 
-export function useScContentMapping(
-  options: { name?: string; skip?: boolean } = {}
-) {
-  const { name, skip } = options;
+export function useScContentMapping(options: {
+  id: string;
+  name: string;
+  skip?: boolean;
+}): UseQueryResult<ScContentMappingCollectionResponse, unknown> {
+  const { id, skip, name } = options;
   const key = `${useScContentMapping}:${name}`;
   return useGqlQuery<ScContentMappingCollectionResponse>(
-    name ? scContentMappingByNameGql : scContentMappingCollectionGql,
+    scContentMappingByNameGql,
     {
       key,
-      input: { name },
+      input: { id },
       skip,
     }
   );
 }
 
 export function useMappedData(
-  mappingConfig?: ScAppMapping,
-  options: { skip?: boolean } = {}
-) {
+  mappingConfig?: ScreenCloudContentMapping,
+  filterItems?: { sys: { id: string } }[]
+): {
+  result: any;
+  queryResponse: UseQueryResult<
+    Record<string, ContentfulCollection<any>>,
+    unknown
+  >;
+} {
   const queryString = mappingConfig
-    ? queryStringFromAppMapping(mappingConfig)
+    ? queryStringFromAppMapping(
+        mappingConfig.mapping,
+        mappingConfig.contentType
+      )
     : undefined;
   const queryResponse =
     useGqlQuery<Record<string, ContentfulCollection<any>>>(queryString);
-  // console.log(`queryResponse`, queryResponse)
 
   const result = useMemo(() => {
-    if (!mappingConfig) {
+    if (!mappingConfig || !filterItems) {
       return undefined;
     }
     const entries =
       queryResponse.data?.[`${mappingConfig.contentType}Collection`].items;
-    return mapContent(mappingConfig, entries || []);
-  }, [mappingConfig, queryResponse.data]);
 
-  return { result, ...queryResponse };
+    return mapContent(mappingConfig, filterItems, entries || []);
+  }, [mappingConfig, filterItems, queryResponse.data]);
+
+  return { result, queryResponse };
 }

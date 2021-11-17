@@ -31,10 +31,9 @@ export const QuoteRightContent: FunctionComponent<Props> = (
           alignItems="center"
         >
           <Text
-            type={TextSizes.SmallP}
+            type={TextSizes.H4}
             wordBreak="break-word"
             fontFamily={"sans-serif"}
-            paddingBottom={{ _: 4, lg: 7 }}
           >
             <RichText document={item.text.json} />
           </Text>

@@ -7,3 +7,7 @@
 .richtext > ol > li > p:last-child {
   margin-bottom: 0;
 }
+
+.richtext > blockquote + p {
+  margin-top: 24px;
+}

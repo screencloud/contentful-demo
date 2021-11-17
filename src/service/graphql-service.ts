@@ -1,5 +1,5 @@
-import { request } from "graphql-request";
 import { useContext } from "react";
+import { request } from "graphql-request";
 import { useQuery } from "react-query";
 import { SCREEN_CLOUD_CTX } from "./screencloud-config/screecloud-ctx";
 
@@ -14,12 +14,12 @@ interface GetEndpointInput {
   env?: string;
 }
 
-export const getEndpoint = (input?: GetEndpointInput): string => {
+export const getEndpoint = (input: GetEndpointInput): string => {
   let url = `https://graphql.contentful.com/content/v1/spaces/${input?.spaceId}`;
   if (input?.env) {
     url += `/environments/${input.env}`;
   }
-  return `${url}?access_token=${input?.apiKey}`;
+  return `${url}?access_token=${input.apiKey}`;
 };
 
 type Input = {
@@ -33,16 +33,15 @@ export async function gqlRequest<ReturnType>(
   apiKey: string,
   query: string,
   input: Input = {}
-) {
+): Promise<ReturnType> {
   const { preview = false, env } = input;
   const endpoint = getEndpoint({ spaceId, apiKey, env, preview });
-  // console.log(`endpoint`, endpoint, input);
   return await request<ReturnType>(endpoint, query, input);
 }
 
 type UseGqlQueryOptions<ReturnType, P> = {
   key?: string;
-  input?: any;
+  input?: { id?: string };
   pipe?: (response: ReturnType) => ReturnType | P | Promise<P>;
   skip?: boolean;
 };
@@ -50,22 +49,22 @@ type UseGqlQueryOptions<ReturnType, P> = {
 export function useGqlQuery<ReturnType, P = ReturnType>(
   query?: string,
   options?: UseGqlQueryOptions<ReturnType, P>
-) {
+): any {
   const { cfSpaceId, cfApiKey, cfEnv } = useContext(SCREEN_CLOUD_CTX);
   if (!cfSpaceId || !cfApiKey) {
     console.warn(
       `No request can be  executed because there is no spaceId or apiKey provided`
     );
   }
-  const { key = query, input, pipe, skip } = options || {};
+  const { key = query, input, skip } = options || {};
 
   return useQuery(
     key || "useGqlQuery",
     () =>
-      gqlRequest<ReturnType>(cfSpaceId!, cfApiKey!, query || "", {
+      gqlRequest<ReturnType>(cfSpaceId || "", cfApiKey || "", query || "", {
         env: cfEnv,
         ...input,
-      }).then((response) => (!!pipe ? pipe(response) : response)),
+      }).then((response) => response),
     { enabled: !skip && !!query && !!cfSpaceId && !!cfApiKey }
   );
 }

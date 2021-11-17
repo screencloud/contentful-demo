@@ -1,5 +1,8 @@
 export const config = {
-  layout: "",
-  spaceId: "",
-  apiKey: "",
+  config: {
+    apiKey: "",
+    mapName: "",
+    playlistId: "",
+    spaceId: "",
+  },
 };

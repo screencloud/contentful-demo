@@ -4,23 +4,24 @@ import {
   SplitLayoutContainer,
   FullScreenImage,
 } from "@screencloud/alfie-alpha";
-import { ProductRightContent } from "./ProductRightContent";
-import { ContentfulProductItem } from "../../../providers/ContentfulGraphqlDataProvider";
+import { HeroRightContent } from "./HeroRightContent";
+import { ContentfulHeroItem } from "../../../providers/ContentfulGraphqlDataProvider";
 
 interface Props {
   itemDurationSeconds: number;
   companyLogoUrl?: string;
-  item: ContentfulProductItem;
+  item: ContentfulHeroItem;
   progressBarColor?: string;
   themedColor?: string;
   isPortrait: boolean;
 }
 
-export const ProductLayout: FunctionComponent<Props> = (
+export const HeroLayout: FunctionComponent<Props> = (
   props: Props
 ): ReactElement<Props> => {
   const {
     itemDurationSeconds,
+    companyLogoUrl,
     item,
     progressBarColor,
     isPortrait,
@@ -31,21 +32,22 @@ export const ProductLayout: FunctionComponent<Props> = (
 
   return (
     <SplitLayoutContainer
-      leftContentWidth={"50"}
-      rightContentWidth={"50"}
+      leftContentWidth={"30"}
+      rightContentWidth={"70"}
       isPortrait={isPortrait}
       borderColor={themeColor}
       leftContent={
-        <FullScreenImage
-          url={item.image.url}
+        <HeroRightContent
           itemDurationSeconds={itemDurationSeconds}
+          item={item}
+          companyLogoUrl={companyLogoUrl}
+          progressBarColor={progressBarColor}
         />
       }
       rightContent={
-        <ProductRightContent
+        <FullScreenImage
+          url={item.image?.url || ""}
           itemDurationSeconds={itemDurationSeconds}
-          item={item}
-          progressBarColor={progressBarColor}
         />
       }
     />

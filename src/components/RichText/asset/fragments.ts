@@ -1,4 +1,4 @@
-export type AssetType = {
+export interface AssetType {
   __typename?: "Asset";
   contentType: string;
   description: string;
@@ -7,4 +7,4 @@ export type AssetType = {
   title: string;
   url: string;
   width: number;
-};
+}

@@ -1,14 +1,14 @@
-import React from "react";
+import React, { FunctionComponent } from "react";
 import { AssetType } from "./fragments";
 
-type Props = AssetType & {
+interface Props extends AssetType {
   disableCaption?: boolean;
   className?: string;
   imgWidth?: number | string;
   imgHeight?: number | string;
-};
+}
 
-const ImageAsset: React.FC<Props> = (props) => {
+const ImageAsset: FunctionComponent<Props> = (props: Props) => {
   if (!props.url) {
     return null;
   }
@@ -21,7 +21,6 @@ const ImageAsset: React.FC<Props> = (props) => {
         alt={props.description || undefined}
         title={props.title || undefined}
         className={props.className}
-        // sizes="(min-width: 768px) 60vw, (min-width: 1280px) 750px, 98vw"
       />
       {!props.disableCaption && props.title && (
         <figcaption className="text-gray-700 text-center">

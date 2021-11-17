@@ -55,8 +55,6 @@ export class ScreenCloudPlayerProvider extends Component<Props, State> {
     });
   }
 
-  componentWillUnmount() {}
-
   render() {
     const props = {
       appStarted: this.state.appStarted,
