@@ -1,0 +1,55 @@
+import React, { ReactElement, FunctionComponent } from "react";
+import {
+  theme,
+  SplitLayoutContainer,
+  FullScreenImage,
+} from "@screencloud/alfie-alpha";
+import { BlogPostRightContent } from "./BlogPostRightContent";
+import { ContentfulBlogItem } from "../../../providers/ContentfulGraphqlDataProvider";
+
+interface Props {
+  itemDurationSeconds: number;
+  companyLogoUrl?: string;
+  item: ContentfulBlogItem;
+  progressBarColor?: string;
+  themedColor?: string;
+  isPortrait: boolean;
+}
+
+export const BlogPostLayout: FunctionComponent<Props> = (
+  props: Props
+): ReactElement<Props> => {
+  const {
+    itemDurationSeconds,
+    companyLogoUrl,
+    item,
+    progressBarColor,
+    isPortrait,
+    themedColor,
+  } = props;
+
+  const themeColor = themedColor || theme.colors.gray;
+
+  return (
+    <SplitLayoutContainer
+      leftContentWidth={"50"}
+      rightContentWidth={"50"}
+      isPortrait={isPortrait}
+      borderColor={themeColor}
+      leftContent={
+        <FullScreenImage
+          url={item.image?.url || ""}
+          itemDurationSeconds={itemDurationSeconds}
+        />
+      }
+      rightContent={
+        <BlogPostRightContent
+          itemDurationSeconds={itemDurationSeconds}
+          item={item}
+          companyLogoUrl={companyLogoUrl}
+          progressBarColor={progressBarColor}
+        />
+      }
+    />
+  );
+};

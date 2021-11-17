@@ -1,0 +1,9 @@
+.richtext > ul > li > p:first-child,
+.richtext > ol > li > p:first-child {
+  margin-top: 0;
+}
+
+.richtext > ul > li > p:last-child,
+.richtext > ol > li > p:last-child {
+  margin-bottom: 0;
+}
