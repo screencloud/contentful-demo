@@ -10,16 +10,12 @@ import {
 
 const queryClient = new QueryClient();
 
-export const Blog = "blog";
-export const Quotes = "quotes";
-export const Products = "products";
-export const Heroes = "heroes";
 
-type ContentfulType =
-  | typeof Blog
-  | typeof Quotes
-  | typeof Products
-  | typeof Heroes;
+type TemplateName =
+  | 'blog'
+  | 'quotes'
+  | 'products'
+  | 'heroes';
 
 export interface ContentfulBlogItem {
   title: string;
@@ -54,25 +50,15 @@ export interface ContentfulHeroItem {
   color: string;
 }
 
-export type ContentfulDataItem =
-  | {
-      type: typeof Blog;
-      items: ContentfulBlogItem[];
-    }
-  | {
-      type: typeof Quotes;
-      items: ContentfulQuoteItem[];
-    }
-  | {
-      type: typeof Products;
-      items: ContentfulProductItem[];
-    }
-  | {
-      type: typeof Heroes;
-      items: ContentfulHeroItem[];
-    };
+export type TemplateData<TN extends TemplateName, D> = { templateName: TN, items: D[]}
 
-export interface Contentful {
+export type ContentfulDataItem =
+  | TemplateData<'blog', ContentfulBlogItem>
+  | TemplateData<'quotes', ContentfulQuoteItem>
+  | TemplateData<'products', ContentfulProductItem>
+  | TemplateData<'heroes', ContentfulHeroItem>;
+
+export interface ContentfulData {
   data?: ContentfulDataItem;
   loading: boolean;
   error: unknown;
@@ -90,20 +76,9 @@ const initialState = {
   error: undefined,
 };
 
-const getType = (layout: string): ContentfulType => {
-  switch (layout) {
-    case "quotes":
-    case "blog":
-    case "products":
-    case "heroes":
-      return layout;
-    default:
-      return "heroes";
-  }
-};
 
 export const ContentfulDataContext =
-  React.createContext<Contentful>(initialState);
+  React.createContext<ContentfulData>(initialState);
 
 function Container(props: Props) {
   const scContentMappingQuery = useScContentMapping({
@@ -121,14 +96,15 @@ function Container(props: Props) {
     result,
   } = useMappedData(mapping, filterItems);
 
-  const type = getType(mapping?.name || "");
+  const type = mapping?.name as TemplateName | undefined;
+  if (!type) return <>{props.children}</>;
 
   return (
     <ContentfulDataContext.Provider
       value={{
         loading: isLoading,
         error,
-        data: { items: result || [], type },
+        data: { items: result || [], templateName: type },
       }}
     >
       {props.children}
@@ -162,5 +138,5 @@ export const ContentfulGraphqlDataProvider = ({
   );
 };
 
-export const useContentful = (): Contentful =>
+export const useContentful = (): ContentfulData =>
   useContext(ContentfulDataContext);

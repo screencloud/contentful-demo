@@ -2,10 +2,6 @@ import React, { ReactElement, FunctionComponent, useState } from "react";
 import { DEFAULT_ITEM_DELAY_SECONDS } from "@screencloud/alfie-alpha";
 import useTimeout from "../../hooks/useTimeout";
 import {
-  Blog,
-  Heroes,
-  Products,
-  Quotes,
   useContentful,
 } from "../../providers/ContentfulGraphqlDataProvider";
 import { BlogPostLayout } from "../Layouts/BlogPostLayout/BlogPostLayout";
@@ -13,6 +9,13 @@ import { QuoteLayout } from "../Layouts/QuoteLayout/QuoteLayout";
 import { HeroLayout } from "../Layouts/HeroLayout/HeroLayout";
 import { ProductLayout } from "../Layouts/ProductLayout/ProductLayout";
 import { useScreenCloudPlayer } from "../../providers/ScreenCloudPlayerProvider";
+
+const components = {
+  blog: BlogPostLayout,
+  quotes: QuoteLayout,
+  products: HeroLayout,
+  heroes: ProductLayout,
+} as const;
 
 export const SlideShow: FunctionComponent<{}> =
   (props: {}): ReactElement<{}> => {
@@ -45,48 +48,17 @@ export const SlideShow: FunctionComponent<{}> =
       return <></>;
     }
 
-    switch (data.type) {
-      case Blog:
-        return (
-          <BlogPostLayout
-            itemDurationSeconds={DEFAULT_ITEM_DELAY_SECONDS}
-            item={data.items[currentItemIndex]}
-            isPortrait={isPortrait}
-            companyLogoUrl={companyLogoUrl}
-            themedColor={themedColor}
-          />
-        );
-      case Quotes:
-        return (
-          <QuoteLayout
-            itemDurationSeconds={DEFAULT_ITEM_DELAY_SECONDS}
-            item={data.items[currentItemIndex]}
-            isPortrait={isPortrait}
-            companyLogoUrl={companyLogoUrl}
-            themedColor={themedColor}
-          />
-        );
-      case Heroes:
-        return (
-          <HeroLayout
-            itemDurationSeconds={DEFAULT_ITEM_DELAY_SECONDS}
-            item={data.items[currentItemIndex]}
-            isPortrait={isPortrait}
-            companyLogoUrl={companyLogoUrl}
-            themedColor={themedColor}
-          />
-        );
-      case Products:
-        return (
-          <ProductLayout
-            itemDurationSeconds={DEFAULT_ITEM_DELAY_SECONDS}
-            item={data.items[currentItemIndex]}
-            isPortrait={isPortrait}
-            companyLogoUrl={companyLogoUrl}
-            themedColor={themedColor}
-          />
-        );
-      default:
-        return <></>;
-    }
+    const Comp = components[data.templateName];
+    return (
+      Comp ? (
+        <Comp
+          itemDurationSeconds={DEFAULT_ITEM_DELAY_SECONDS}
+          item={data.items[currentItemIndex] as any}
+          isPortrait={isPortrait}
+          companyLogoUrl={companyLogoUrl}
+          themedColor={themedColor}
+        />
+      )
+      : <></>
+    )
   };
