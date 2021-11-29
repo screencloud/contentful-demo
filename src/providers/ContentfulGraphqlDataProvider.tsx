@@ -93,12 +93,10 @@ const initialState = {
 const getType = (layout: string): ContentfulType => {
   switch (layout) {
     case "quotes":
-      return "quotes";
     case "blog":
-      return "blog";
     case "products":
-      return "products";
     case "heroes":
+      return layout;
     default:
       return "heroes";
   }

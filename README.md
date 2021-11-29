@@ -4,15 +4,13 @@ To run the app locally:
 
 1. `npm install`
 
-2. Update `src/config.development` with
+2. Create a file `./.env.local` with:
 
 ```
-{
-    apiKey,
-    mapName,
-    playlistId,
-    spaceId
-}
+REACT_APP_API_KEY = XXX
+REACT_APP_SPACE_ID = XXX
+REACT_APP_MAP_NAME = XXX
+REACT_APP_PLAYLIST_ID = XXX
 ```
 
 3. `npm start`
