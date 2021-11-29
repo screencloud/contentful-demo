@@ -1,6 +1,6 @@
 import { useMemo } from "react";
 import { UseQueryResult } from "react-query";
-import { capitalize } from "./string-utils";
+import { capitalize } from "../../utils/string-utils";
 import {
   ContentfulCollection,
   useGqlQuery,
