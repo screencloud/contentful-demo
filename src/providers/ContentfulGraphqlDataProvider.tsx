@@ -1,12 +1,12 @@
 import React, { ReactNode, useContext } from "react";
 import { QueryClientProvider, QueryClient } from "react-query";
 import * as types from "@contentful/rich-text-types";
-import { SCREEN_CLOUD_CTX } from "../service/screencloud-config/screecloud-ctx";
+import { SCREEN_CLOUD_CTX } from "../service/schema-connector/screecloud-ctx";
 import {
-  useScContentMapping,
+  useContentFeedQuery,
   useMappedData,
   ImageAsset,
-} from "../service/screencloud-config/sc-content-mapping-service";
+} from "../service/schema-connector/content-mapping-service";
 
 const queryClient = new QueryClient();
 
@@ -66,7 +66,6 @@ export interface ContentfulData {
 
 interface Props {
   children: ReactNode;
-  mapName: string;
   playlistId: string;
 }
 
@@ -81,15 +80,14 @@ export const ContentfulDataContext =
   React.createContext<ContentfulData>(initialState);
 
 function Container(props: Props) {
-  const scContentMappingQuery = useScContentMapping({
+  const contentFeedQuery = useContentFeedQuery({
     id: props.playlistId,
-    name: props.mapName,
   });
 
   const mapping =
-    scContentMappingQuery.data?.contentFeed?.contentMappingConfig.config;
+    contentFeedQuery.data?.contentFeed?.contentMappingConfig.config;
   const filterItems =
-    scContentMappingQuery.data?.contentFeed?.entriesCollection.items;
+    contentFeedQuery.data?.contentFeed?.entriesCollection.items;
 
   const {
     queryResponse: { isLoading, error },
@@ -116,13 +114,11 @@ export const ContentfulGraphqlDataProvider = ({
   children,
   apiKey,
   spaceId,
-  mapName = "",
   playlistId = "",
 }: {
   apiKey?: string;
   spaceId?: string;
-  mapName: string;
-  playlistId: string;
+  playlistId?: string;
   children: ReactNode;
 }): JSX.Element => {
   return (
@@ -130,7 +126,7 @@ export const ContentfulGraphqlDataProvider = ({
       <SCREEN_CLOUD_CTX.Provider
         value={{ cfApiKey: apiKey, cfSpaceId: spaceId }}
       >
-        <Container mapName={mapName} playlistId={playlistId}>
+        <Container playlistId={playlistId}>
           {children}
         </Container>
       </SCREEN_CLOUD_CTX.Provider>

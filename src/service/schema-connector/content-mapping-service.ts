@@ -4,12 +4,12 @@ import { capitalize } from "../../utils/string-utils";
 import {
   ContentfulCollection,
   useGqlQuery,
-} from "../../service/graphql-service";
+} from "../graphql-service";
 import {
-  scContentMappingByNameGql,
-  ScContentMappingCollectionResponse,
-  ScreenCloudContentMapping,
-} from "./sc-content-mapping.queries";
+  ContentFeedGql,
+  ContentMappingCollectionResponse,
+  ContentMappingConfig,
+} from "./content-mapping.queries";
 
 export interface ImageAsset {
   description: string;
@@ -39,7 +39,7 @@ function filterContent(
 }
 
 export function mapContent(
-  mappingConfig: ScreenCloudContentMapping,
+  mappingConfig: ContentMappingConfig,
   filterItems: { sys: { id: string } }[],
   data: Array<Record<string, any>>
 ): any[] {
@@ -72,11 +72,11 @@ export function mapContent(
   });
 }
 
-export function queryStringFromAppMapping(
-  mapping: Record<string, string>,
+export function queryStringFromMappingConfig(
+  fieldMapping: Record<string, string>,
   contentType: string
 ): string {
-  const entries = Object.entries(mapping);
+  const entries = Object.entries(fieldMapping);
 
   const itemsQueryString = entries?.reduce((itemsString, entry) => {
     const path = entry[1];
@@ -140,15 +140,14 @@ export function queryStringFromAppMapping(
   return queryString;
 }
 
-export function useScContentMapping(options: {
+export function useContentFeedQuery(options: {
   id: string;
-  name: string;
   skip?: boolean;
-}): UseQueryResult<ScContentMappingCollectionResponse, unknown> {
-  const { id, skip, name } = options;
-  const key = `${useScContentMapping}:${name}`;
-  return useGqlQuery<ScContentMappingCollectionResponse>(
-    scContentMappingByNameGql,
+}): UseQueryResult<ContentMappingCollectionResponse, unknown> {
+  const { id, skip } = options;
+  const key = `${useContentFeedQuery}:${id}`;
+  return useGqlQuery<ContentMappingCollectionResponse>(
+    ContentFeedGql,
     {
       key,
       input: { id },
@@ -158,7 +157,7 @@ export function useScContentMapping(options: {
 }
 
 export function useMappedData(
-  mappingConfig?: ScreenCloudContentMapping,
+  mappingConfig?: ContentMappingConfig,
   filterItems?: { sys: { id: string } }[]
 ): {
   result: any;
@@ -168,7 +167,7 @@ export function useMappedData(
   >;
 } {
   const queryString = mappingConfig
-    ? queryStringFromAppMapping(
+    ? queryStringFromMappingConfig(
         mappingConfig.mapping,
         mappingConfig.contentType
       )

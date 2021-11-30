@@ -27,7 +27,6 @@ ReactDOM.render(
           <ContentfulGraphqlDataProvider
             apiKey={config?.apiKey}
             spaceId={config?.spaceId}
-            mapName={config?.mapName}
             playlistId={config?.playlistId}
           >
             <div className="app-container">

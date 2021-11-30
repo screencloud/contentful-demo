@@ -1,7 +1,7 @@
 import { useContext } from "react";
 import { request } from "graphql-request";
 import { useQuery } from "react-query";
-import { SCREEN_CLOUD_CTX } from "./screencloud-config/screecloud-ctx";
+import { SCREEN_CLOUD_CTX } from "./schema-connector/screecloud-ctx";
 
 export type ContentfulCollection<CType> = {
   items: CType[];
