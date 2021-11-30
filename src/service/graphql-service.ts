@@ -42,14 +42,14 @@ export async function gqlRequest<ReturnType>(
 type UseGqlQueryOptions<ReturnType, P> = {
   key?: string;
   input?: { id?: string };
-  pipe?: (response: ReturnType) => ReturnType | P | Promise<P>;
+  // pipe?: (response: ReturnType) => ReturnType | P | Promise<P>;
   skip?: boolean;
 };
 
-export function useGqlQuery<ReturnType, P = ReturnType>(
+export function useGqlQuery<ReturnType = any, P = ReturnType>(
   query?: string,
   options?: UseGqlQueryOptions<ReturnType, P>
-): any {
+) {
   const { cfSpaceId, cfApiKey, cfEnv } = useContext(SCREEN_CLOUD_CTX);
   if (!cfSpaceId || !cfApiKey) {
     console.warn(

@@ -22,22 +22,15 @@ export interface ImageAsset {
   url: string;
 }
 
-function mapLink(baseUrl?: string, slug?: string) {
-  if (!baseUrl || !slug) {
-    return {};
-  }
-  return { link: `${baseUrl}/${slug}` };
-}
-
-function filterContent(
-  data: Array<Record<string, any>>,
-  filterItems: { sys: { id: string } }[]
-) {
-  return data.filter((item) =>
-    filterItems.some((filterItem) => filterItem.sys.id === item.sys.id)
-  );
-}
-
+/**
+ * Expects a data object which is the response of a Contentful API call
+ * and maps it to the schema defined in `mappingConfig`.
+ * @param mappingConfig 
+ * @param filterItems A list of ContentIds which should be included in the result
+ * @param data Data as received from the Contentful API
+ *  (which should be mapped according to `mappingConfig`)
+ * @returns Data Object according to the schema derrived from `mappingConfig`.
+ */
 export function mapContent(
   mappingConfig: ContentMappingConfig,
   filterItems: { sys: { id: string } }[],
@@ -72,11 +65,12 @@ export function mapContent(
   });
 }
 
-export function queryStringFromMappingConfig(
-  fieldMapping: Record<string, string>,
-  contentType: string
-): string {
-  const entries = Object.entries(fieldMapping);
+/**
+ * @returns Generates a GraphQL queryString which can be used to call the
+ */
+export function queryStringFromMappingConfig(config: ContentMappingConfig) {
+  const { contentType, mapping } = config;
+  const entries = Object.entries(mapping);
 
   const itemsQueryString = entries?.reduce((itemsString, entry) => {
     const path = entry[1];
@@ -156,6 +150,14 @@ export function useContentFeedQuery(options: {
   );
 }
 
+/**
+ * Generates a graphql queryString out of a mappingConfig
+ * and requests the Contentful Api.
+ * @param mappingConfig 
+ * @param filterItems A list of Content IDs which should be included in the results.
+ *  When not provided all items will be included. 
+ * @returns React Query Object and resulting data (already mapped accorudng to `mappingConfig`)
+ */
 export function useMappedData(
   mappingConfig?: ContentMappingConfig,
   filterItems?: { sys: { id: string } }[]
@@ -167,12 +169,9 @@ export function useMappedData(
   >;
 } {
   const queryString = mappingConfig
-    ? queryStringFromMappingConfig(
-        mappingConfig.mapping,
-        mappingConfig.contentType
-      )
+    ? queryStringFromMappingConfig(mappingConfig)
     : undefined;
-  const queryResponse =
+  const query =
     useGqlQuery<Record<string, ContentfulCollection<any>>>(queryString);
 
   const result = useMemo(() => {
@@ -180,10 +179,28 @@ export function useMappedData(
       return undefined;
     }
     const entries =
-      queryResponse.data?.[`${mappingConfig.contentType}Collection`].items;
+      query.data?.[`${mappingConfig.contentType}Collection`].items;
 
     return mapContent(mappingConfig, filterItems, entries || []);
-  }, [mappingConfig, filterItems, queryResponse.data]);
+  }, [mappingConfig, filterItems, query.data]);
+  
+  return { result, queryResponse: query };
+}
 
-  return { result, queryResponse };
+// Utitliy functions:
+
+function mapLink(baseUrl?: string, slug?: string) {
+  if (!baseUrl || !slug) {
+    return {};
+  }
+  return { link: `${baseUrl}/${slug}` };
+}
+
+function filterContent(
+  data: Array<Record<string, any>>,
+  filterItems: { sys: { id: string } }[]
+) {
+  return data.filter((item) =>
+    filterItems.some((filterItem) => filterItem.sys.id === item.sys.id)
+  );
 }
