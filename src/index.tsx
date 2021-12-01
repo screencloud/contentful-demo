@@ -6,7 +6,7 @@ import {
   ScreenCloudPlayerContext,
   ScreenCloudPlayerProvider,
 } from "./providers/ScreenCloudPlayerProvider";
-import { ContentfulGraphqlDataProvider } from "./providers/ContentfulGraphqlDataProvider";
+import { ContentfulGraphQlDataProvider } from "./providers/ContentfulGraphqlDataProvider";
 import { config as devConfig } from "./config.development";
 import reportWebVitals from "./reportWebVitals";
 import * as serviceWorkerRegistration from "./serviceWorkerRegistration";
@@ -24,15 +24,16 @@ ReactDOM.render(
     <ScreenCloudPlayerProvider testData={devConfig}>
       <ScreenCloudPlayerContext.Consumer>
         {({ config }) => (
-          <ContentfulGraphqlDataProvider
+          <ContentfulGraphQlDataProvider
             apiKey={config?.apiKey}
             spaceId={config?.spaceId}
-            playlistId={config?.playlistId}
+            contentFeedId={config?.playlistId}
+            refetchInterval={3000}
           >
             <div className="app-container">
               <App />
             </div>
-          </ContentfulGraphqlDataProvider>
+          </ContentfulGraphQlDataProvider>
         )}
       </ScreenCloudPlayerContext.Consumer>
     </ScreenCloudPlayerProvider>

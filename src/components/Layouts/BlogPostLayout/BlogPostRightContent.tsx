@@ -51,9 +51,7 @@ const getPublishedTime = (publishedDate: string): string => {
   return `${differenceDays} days ago`;
 };
 
-export const BlogPostRightContent: FunctionComponent<Props> = (
-  props: Props
-): ReactElement<Props> => {
+export const BlogPostRightContent: FunctionComponent<Props> = props => {
   const { itemDurationSeconds, item, progressBarColor } = props;
 
   const [key, setKey] = useState(Date.now());

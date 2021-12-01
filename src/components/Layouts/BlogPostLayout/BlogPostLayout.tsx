@@ -1,4 +1,4 @@
-import React, { ReactElement, FunctionComponent } from "react";
+import React, { FunctionComponent } from "react";
 import {
   theme,
   SplitLayoutContainer,
@@ -14,11 +14,13 @@ interface Props {
   progressBarColor?: string;
   themedColor?: string;
   isPortrait: boolean;
+  updatedAt?: string;
 }
 
 export const BlogPostLayout: FunctionComponent<Props> = (
   props: Props
-): ReactElement<Props> => {
+) => {
+  // console.log(`BlogPostLayout()`);
   const {
     itemDurationSeconds,
     companyLogoUrl,

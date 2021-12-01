@@ -1,7 +1,7 @@
 import React, { ReactNode, useContext } from "react";
 import { QueryClientProvider, QueryClient } from "react-query";
 import * as types from "@contentful/rich-text-types";
-import { SCREEN_CLOUD_CTX } from "../service/schema-connector/screecloud-ctx";
+import { ContentfulApiContext } from "../service/contentful-api/contentful-api-ctx";
 import {
   useContentFeedQuery,
   useMappedData,
@@ -58,30 +58,22 @@ export type ContentfulDataItem =
   | TemplateData<'products', ContentfulProductItem>
   | TemplateData<'heroes', ContentfulHeroItem>;
 
-export interface ContentfulData {
-  data?: ContentfulDataItem;
-  loading: boolean;
-  error: unknown;
-}
 
 interface Props {
   children: ReactNode;
-  playlistId: string;
+  contentFeedId: string;
+  refetchInterval?: number;
 }
 
-const initialState = {
-  data: undefined,
+export const ContentfulDataContext = React.createContext({
+  data: undefined as ContentfulDataItem|undefined,
   loading: false,
-  error: undefined,
-};
-
-
-export const ContentfulDataContext =
-  React.createContext<ContentfulData>(initialState);
+  error: undefined as unknown,
+});
 
 function Container(props: Props) {
   const contentFeedQuery = useContentFeedQuery({
-    id: props.playlistId,
+    id: props.contentFeedId,
   });
 
   const mapping =
@@ -91,8 +83,8 @@ function Container(props: Props) {
 
   const {
     queryResponse: { isLoading, error },
-    result,
-  } = useMappedData(mapping, filterItems);
+    items = [],
+  } = useMappedData(mapping, { filterItems, refetchInterval: props.refetchInterval });
 
   const type = mapping?.name as TemplateName | undefined;
   if (!type) return <>{props.children}</>;
@@ -102,7 +94,7 @@ function Container(props: Props) {
       value={{
         loading: isLoading,
         error,
-        data: { items: result || [], templateName: type },
+        data: { items, templateName: type },
       }}
     >
       {props.children}
@@ -110,29 +102,26 @@ function Container(props: Props) {
   );
 }
 
-export const ContentfulGraphqlDataProvider = ({
-  children,
-  apiKey,
-  spaceId,
-  playlistId = "",
-}: {
+type ProviderProps = {
   apiKey?: string;
   spaceId?: string;
-  playlistId?: string;
+  contentFeedId?: string;
+  refetchInterval?: number;
   children: ReactNode;
-}): JSX.Element => {
+};
+
+export const ContentfulGraphQlDataProvider = (props: ProviderProps) => {
   return (
     <QueryClientProvider client={queryClient}>
-      <SCREEN_CLOUD_CTX.Provider
-        value={{ cfApiKey: apiKey, cfSpaceId: spaceId }}
+      <ContentfulApiContext.Provider
+        value={{ apiKey: props.apiKey, spaceId: props.spaceId }}
       >
-        <Container playlistId={playlistId}>
-          {children}
+        <Container contentFeedId={props.contentFeedId || ''} refetchInterval={props.refetchInterval}>
+          {props.children}
         </Container>
-      </SCREEN_CLOUD_CTX.Provider>
+      </ContentfulApiContext.Provider>
     </QueryClientProvider>
   );
 };
 
-export const useContentful = (): ContentfulData =>
-  useContext(ContentfulDataContext);
+export const useContentfulData = () => useContext(ContentfulDataContext);

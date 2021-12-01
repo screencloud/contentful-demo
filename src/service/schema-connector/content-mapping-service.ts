@@ -1,14 +1,14 @@
-import { useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { UseQueryResult } from "react-query";
 import { capitalize } from "../../utils/string-utils";
 import {
   ContentfulCollection,
-  useGqlQuery,
-} from "../graphql-service";
+  useGqlQuery
+} from "../contentful-api/contentful-graphql-service";
 import {
   ContentFeedGql,
   ContentMappingCollectionResponse,
-  ContentMappingConfig,
+  ContentMappingConfig
 } from "./content-mapping.queries";
 
 export interface ImageAsset {
@@ -33,10 +33,10 @@ export interface ImageAsset {
  */
 export function mapContent(
   mappingConfig: ContentMappingConfig,
-  filterItems: { sys: { id: string } }[],
-  data: Array<Record<string, any>>
+  data: Array<Record<string, any>>,
+  // filterItems?: { sys: { id: string } }[],
 ): any[] {
-  return filterContent(data, filterItems).map((dataItem) => {
+  return data.map((dataItem) => {
     const mappingEntries = Object.entries(mappingConfig.mapping || {});
 
     /** for every mapping entry we get the data out of the contentful entry */
@@ -110,8 +110,9 @@ export function queryStringFromMappingConfig(config: ContentMappingConfig) {
         return str;
       }, ``);
 
-    return `${itemsString}${singleItemString} sys { id }`;
+    return `${itemsString}${singleItemString} sys { id publishedAt }`;
   }, ``);
+
 
   const queryString = `query {
     ${contentType}Collection(limit: 20) {
@@ -160,31 +161,54 @@ export function useContentFeedQuery(options: {
  */
 export function useMappedData(
   mappingConfig?: ContentMappingConfig,
-  filterItems?: { sys: { id: string } }[]
-): {
-  result: any;
-  queryResponse: UseQueryResult<
-    Record<string, ContentfulCollection<any>>,
-    unknown
-  >;
-} {
+  options?: {
+    filterItems?: { sys: { id: string } }[]
+    refetchInterval?: number,
+  }
+) {
+  const { filterItems, refetchInterval} = options || {};
+
   const queryString = mappingConfig
     ? queryStringFromMappingConfig(mappingConfig)
     : undefined;
-  const query =
-    useGqlQuery<Record<string, ContentfulCollection<any>>>(queryString);
 
-  const result = useMemo(() => {
-    if (!mappingConfig || !filterItems) {
+  const query =
+    useGqlQuery<Record<string, ContentfulCollection<any>>>(
+      queryString,
+      { refetchInterval },
+    );
+
+    /** Items (filtered by Ids) returned by contentful. */
+  const contentfulItems = useMemo(() => {
+    if (!mappingConfig) {
       return undefined;
     }
-    const entries =
+    const items =
       query.data?.[`${mappingConfig.contentType}Collection`].items;
 
-    return mapContent(mappingConfig, filterItems, entries || []);
+    return items && filterItems ? filterContent(items, filterItems) : items
   }, [mappingConfig, filterItems, query.data]);
+
+  /** Items already mapped, which are returned by this hook in the end. */
+  const [items, setItems] = useState(mappingConfig && contentfulItems ? mapContent(mappingConfig, contentfulItems) : []);
+
+  /** get a key which changes when a content item was changed in the backend. */
+  const itemsLastUpdatedKey = useMemo(() => (
+    contentfulItems?.map(item => item.publishedAt).join(',')
+  ), [contentfulItems])
+
+
+  /**
+   * only when `itemsLastUpdatedKey ` changed we map and update our items.
+   * Otherwise we just received the same date after polling:
+   */
+  useEffect(() => {
+    if (itemsLastUpdatedKey) {
+      setItems(mappingConfig && contentfulItems ? mapContent(mappingConfig, contentfulItems) : [])
+    }
+  }, [contentfulItems, itemsLastUpdatedKey, mappingConfig])
   
-  return { result, queryResponse: query };
+  return { items, queryResponse: query };
 }
 
 // Utitliy functions:

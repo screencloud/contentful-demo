@@ -13,7 +13,7 @@ const useTimeout = (
     callbackRef.current = callback;
   });
 
-  const tick = (): void => {
+  const tick = () => {
     // clear timeout before calling callback so when callback triggers parent component render it will create a new timeout
     if (timerRef.current) {
       clearTimeout(timerRef.current);
