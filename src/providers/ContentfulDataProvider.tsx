@@ -1,14 +1,9 @@
-import React, { ReactNode, useContext } from "react";
-import { QueryClientProvider, QueryClient } from "react-query";
 import * as types from "@contentful/rich-text-types";
-import { ContentfulApiContext } from "../service/contentful-api/contentful-api-ctx";
+import React, { FunctionComponent, useContext } from "react";
 import {
-  useContentFeedQuery,
-  useMappedData,
-  ImageAsset,
+  ImageAsset, useContentFeedQuery,
+  useMappedData
 } from "../service/schema-connector/content-mapping-service";
-
-const queryClient = new QueryClient();
 
 
 type TemplateName =
@@ -59,11 +54,6 @@ export type ContentfulDataItem =
   | TemplateData<'heroes', ContentfulHeroItem>;
 
 
-interface Props {
-  children: ReactNode;
-  contentFeedId: string;
-  refetchInterval?: number;
-}
 
 export const ContentfulDataContext = React.createContext({
   data: undefined as ContentfulDataItem|undefined,
@@ -71,9 +61,17 @@ export const ContentfulDataContext = React.createContext({
   error: undefined as unknown,
 });
 
-function Container(props: Props) {
+
+
+type Props = {
+  contentFeedId?: string;
+  refetchInterval?: number;
+};
+
+export const ContentfulDataProvider: FunctionComponent<Props> = props => {
   const contentFeedQuery = useContentFeedQuery({
-    id: props.contentFeedId,
+    skip: !props.contentFeedId,
+    id: props.contentFeedId!,
   });
 
   const mapping =
@@ -99,28 +97,6 @@ function Container(props: Props) {
     >
       {props.children}
     </ContentfulDataContext.Provider>
-  );
-}
-
-type ProviderProps = {
-  apiKey?: string;
-  spaceId?: string;
-  contentFeedId?: string;
-  refetchInterval?: number;
-  children: ReactNode;
-};
-
-export const ContentfulGraphQlDataProvider = (props: ProviderProps) => {
-  return (
-    <QueryClientProvider client={queryClient}>
-      <ContentfulApiContext.Provider
-        value={{ apiKey: props.apiKey, spaceId: props.spaceId }}
-      >
-        <Container contentFeedId={props.contentFeedId || ''} refetchInterval={props.refetchInterval}>
-          {props.children}
-        </Container>
-      </ContentfulApiContext.Provider>
-    </QueryClientProvider>
   );
 };
 

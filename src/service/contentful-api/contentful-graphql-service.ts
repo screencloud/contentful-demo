@@ -39,7 +39,7 @@ export async function gqlRequest<ReturnType>(
   return await request<ReturnType>(endpoint, query, input);
 }
 
-type UseGqlQueryOptions<ReturnType, P> = {
+type UseGqlQueryOptions<ReturnType> = {
   key?: string;
   input?: { id?: string };
   // pipe?: (response: ReturnType) => ReturnType | P | Promise<P>;
@@ -48,14 +48,14 @@ type UseGqlQueryOptions<ReturnType, P> = {
   isDataEqual?: UseQueryOptions<ReturnType>['isDataEqual'],
 };
 
-export function useGqlQuery<ReturnType = any, P = ReturnType>(
+export function useGqlQuery<ReturnType = any>(
   query?: string,
-  options?: UseGqlQueryOptions<ReturnType, P>
+  options?: UseGqlQueryOptions<ReturnType>
 ) {
   const { spaceId, apiKey, environment } = useContext(ContentfulApiContext);
   if (!spaceId || !apiKey) {
     console.warn(
-      `No request can be  executed because there is no spaceId or apiKey provided`
+      `No request can be  executed because there is no spaceId or apiKey provided.`
     );
   }
   const { key = query, input, skip, refetchInterval, isDataEqual } = options || {};

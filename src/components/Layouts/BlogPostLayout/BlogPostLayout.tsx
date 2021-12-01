@@ -5,7 +5,7 @@ import {
   FullScreenImage,
 } from "@screencloud/alfie-alpha";
 import { BlogPostRightContent } from "./BlogPostRightContent";
-import { ContentfulBlogItem } from "../../../providers/ContentfulGraphqlDataProvider";
+import { ContentfulBlogItem } from "../../../providers/ContentfulDataProvider";
 
 interface Props {
   itemDurationSeconds: number;

@@ -12,7 +12,7 @@ import {
   Text,
   TextSizes,
 } from "@screencloud/alfie-alpha";
-import { ContentfulProductItem } from "../../../providers/ContentfulGraphqlDataProvider";
+import { ContentfulProductItem } from "../../../providers/ContentfulDataProvider";
 
 interface Props {
   itemDurationSeconds: number;

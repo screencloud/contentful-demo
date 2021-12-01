@@ -3,7 +3,7 @@ import React, { useState } from "react";
 import useTimeout from "../../hooks/useTimeout";
 import {
   useContentfulData
-} from "../../providers/ContentfulGraphqlDataProvider";
+} from "../../providers/ContentfulDataProvider";
 import { useScreenCloudPlayer } from "../../providers/ScreenCloudPlayerProvider";
 import { BlogPostLayout } from "../Layouts/BlogPostLayout/BlogPostLayout";
 import { HeroLayout } from "../Layouts/HeroLayout/HeroLayout";

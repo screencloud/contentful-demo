@@ -1,25 +1,18 @@
-import React, {
-  ReactElement,
-  FunctionComponent,
-  useState,
-  useEffect,
-} from "react";
 import {
-  ContentWrapper,
-  Flex,
-  theme,
-  Text,
-  TextSizes,
-  Box,
-  Progress,
-  QRCode,
+  Box, ContentWrapper,
+  Flex, Progress,
+  QRCode, Text,
+  TextSizes, theme
 } from "@screencloud/alfie-alpha";
 import differenceInDays from "date-fns/differenceInDays";
 import differenceInHours from "date-fns/differenceInHours";
 import differenceInMinutes from "date-fns/differenceInMinutes";
 import differenceInSeconds from "date-fns/differenceInSeconds";
 import format from "date-fns/format";
-import { ContentfulBlogItem } from "../../../providers/ContentfulGraphqlDataProvider";
+import React, {
+  FunctionComponent, useEffect, useState
+} from "react";
+import { ContentfulBlogItem } from "../../../providers/ContentfulDataProvider";
 import { RichText } from "../../RichText/rich-text";
 
 interface Props {
