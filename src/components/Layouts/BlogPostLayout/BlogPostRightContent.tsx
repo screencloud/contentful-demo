@@ -39,7 +39,7 @@ const getPublishedTime = (publishedDate: string): string => {
     return `${differenceHours} hours ago`;
   }
   if (differenceDays > 30) {
-    return format(published, "yyyy-MM-dd");
+    return format(published, "LLL dd, yyyy");
   }
   return `${differenceDays} days ago`;
 };
