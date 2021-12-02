@@ -10,6 +10,8 @@ import { HeroLayout } from "../Layouts/HeroLayout/HeroLayout";
 import { ProductLayout } from "../Layouts/ProductLayout/ProductLayout";
 import { QuoteLayout } from "../Layouts/QuoteLayout/QuoteLayout";
 
+const ITEM_DELAY_SECONDS = DEFAULT_ITEM_DELAY_SECONDS;
+
 /** Maps TemplateNames to the corresponding render component. */
 const components = {
   blog: React.memo(BlogPostLayout),
@@ -23,7 +25,7 @@ export const SlideShow = () => {
     const { appStarted } = useScreenCloudPlayer();
 
     const themedColor = "";
-    const companyLogoUrl = "";
+    const companyLogoUrl = data?.companyLogo;
     const isPortrait = false;
     const items = data?.items;
 
@@ -40,7 +42,7 @@ export const SlideShow = () => {
           }
         }
       },
-      DEFAULT_ITEM_DELAY_SECONDS * 1000,
+      ITEM_DELAY_SECONDS * 1000,
       !!items?.length && appStarted
     );
 
@@ -50,7 +52,7 @@ export const SlideShow = () => {
     return (
       item && Comp ? (
         <Comp
-          itemDurationSeconds={DEFAULT_ITEM_DELAY_SECONDS}
+          itemDurationSeconds={ITEM_DELAY_SECONDS}
           item={item as any}
           isPortrait={isPortrait}
           companyLogoUrl={companyLogoUrl}

@@ -4,6 +4,7 @@ import {
   ImageAsset, useContentFeedQuery,
   useMappedData
 } from "../service/schema-connector/content-mapping-service";
+import { useSiteConfig } from "../service/use-site-config";
 
 
 type TemplateName =
@@ -45,7 +46,11 @@ export interface ContentfulHeroItem {
   color: string;
 }
 
-export type TemplateData<TN extends TemplateName, D> = { templateName: TN, items: D[]}
+export type TemplateData<TN extends TemplateName, D> = {
+  templateName: TN;
+  items: D[];
+  companyLogo?: string;
+}
 
 export type ContentfulDataItem =
   | TemplateData<'blog', ContentfulBlogItem>
@@ -85,6 +90,10 @@ export const ContentfulDataProvider: FunctionComponent<Props> = props => {
   } = useMappedData(mapping, { filterItems, refetchInterval: props.refetchInterval });
 
   const type = mapping?.name as TemplateName | undefined;
+
+  const siteConfig = useSiteConfig()
+  console.log(`logo`, siteConfig);
+
   if (!type) return <>{props.children}</>;
 
   return (
@@ -92,7 +101,11 @@ export const ContentfulDataProvider: FunctionComponent<Props> = props => {
       value={{
         loading: isLoading,
         error,
-        data: { items, templateName: type },
+        data: {
+          items,
+          templateName: type,
+          companyLogo: siteConfig?.logo.url,
+        },
       }}
     >
       {props.children}

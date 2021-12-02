@@ -45,7 +45,7 @@ const getPublishedTime = (publishedDate: string): string => {
 };
 
 export const BlogPostRightContent: FunctionComponent<Props> = props => {
-  const { itemDurationSeconds, item, progressBarColor } = props;
+  const { itemDurationSeconds, item, progressBarColor, companyLogoUrl } = props;
 
   const [key, setKey] = useState(Date.now());
 
@@ -120,6 +120,11 @@ export const BlogPostRightContent: FunctionComponent<Props> = props => {
           flexDirection="row"
         >
           <Box width={"33%"}>
+            {companyLogoUrl && (
+              <Box paddingBottom={{ _: 42}}>
+                <img src={companyLogoUrl} style={{ maxWidth: '100%'}} alt="" />
+              </Box>
+            )}
             <Progress
               duration={itemDurationSeconds}
               barColor={progressBarColor}
