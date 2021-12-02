@@ -10,7 +10,7 @@ import differenceInMinutes from "date-fns/differenceInMinutes";
 import differenceInSeconds from "date-fns/differenceInSeconds";
 import format from "date-fns/format";
 import React, {
-  FunctionComponent, useEffect, useState
+  FunctionComponent, useEffect, useMemo, useState
 } from "react";
 import { customColors } from "../../../custom-theme";
 import { ContentfulBlogItem } from "../../../providers/ContentfulDataProvider";
@@ -40,7 +40,7 @@ const getPublishedTime = (publishedDate: string): string => {
     return `${differenceHours} hours ago`;
   }
   if (differenceDays > 30) {
-    return format(published, "LLL dd, yyyy");
+    return format(published, "LLLL dd, yyyy");
   }
   return `${differenceDays} days ago`;
 };
@@ -54,6 +54,15 @@ export const BlogPostRightContent: FunctionComponent<Props> = props => {
     setKey(Date.now());
   }, [item]);
 
+  const footer = useMemo(() => {
+    const string = [
+      item.author,
+      item.pubDate && getPublishedTime(item.pubDate)
+    ].filter(f => !!f).join(` • `)
+
+    return string ? `By ${string}` : undefined;
+  }, [item.author, item.pubDate])
+
   return (
     <ContentWrapper backgroundColor={theme.colors.white} key={key}>
       <Flex
@@ -62,86 +71,92 @@ export const BlogPostRightContent: FunctionComponent<Props> = props => {
         justifyContent="center"
         height="100%"
       >
-        <Flex
-          overflow="hidden"
-          flexDirection="column"
-          width="100%"
-        >
-          {item.category && (
-            <Text
-              type={TextSizes.H4}
-              color={customColors.lightGray}
-              wordBreak="break-word"
-              fontFamily={"sans-serif"}
-              // fontWeight={theme.fontWeights.black}
-              paddingBottom={{ _: 2, lg: 7 }}
-            >
-              {item.category}
-            </Text>
-          )}
-          <Text
-            type={TextSizes.H4}
-            color={theme.colors.black}
-            wordBreak="break-word"
-            fontFamily={"sans-serif"}
-            fontWeight={theme.fontWeights.black}
-            paddingBottom={{ _: 4, lg: 7 }}
-          >
-            {item.title}
-          </Text>
-        </Flex>
-        {item.pubDate && (
+        {/* Category, Title and Logo */}
+        <Flex justifyContent="space-between"> 
+          {/* Category and Title */}
           <Flex
             overflow="hidden"
-            flexDirection="row"
-            justifyContent="right"
+            flexDirection="column"
             width="100%"
           >
+            {item.category && (
+              <Text
+                type={TextSizes.H4}
+                color={customColors.lightGray}
+                wordBreak="break-word"
+                fontFamily={"sans-serif"}
+                // fontWeight={theme.fontWeights.black}
+                paddingBottom={{ _: 2, lg: 7 }}
+              >
+                {item.category}
+              </Text>
+            )}
             <Text
-              type={TextSizes.Label}
+              type={TextSizes.H4}
               color={theme.colors.black}
               wordBreak="break-word"
               fontFamily={"sans-serif"}
               fontWeight={theme.fontWeights.black}
               paddingBottom={{ _: 4, lg: 7 }}
             >
-              {getPublishedTime(item.pubDate)}
+              {item.title}
             </Text>
           </Flex>
-        )}
+
+          {companyLogoUrl && (
+            <Box width="33%" paddingBottom={{ _: 42}}>
+              <img src={companyLogoUrl} style={{ maxWidth: '100%'}} alt="" />
+            </Box>
+          )}
+        </Flex>
         <Flex
           flexGrow={1}
-          flexDirection="row"
-          flexWrap="wrap"
+          flexDirection="column"
           justifyContent="center"
-          alignItems="center"
+          alignItems="left"
         >
           <Text
             type={TextSizes.SmallP}
             wordBreak="break-word"
             fontFamily={"sans-serif"}
-            paddingBottom={{ _: 4, lg: 7 }}
+            paddingBottom={{ _: 2, lg: 7 }}
           >
             <RichText document={item.description.json} />
           </Text>
+
+          {footer && (
+            <Text
+              type={TextSizes.SmallP}
+              color={customColors.lightGray}
+              wordBreak="break-word"
+              fontFamily={"sans-serif"}
+              paddingBottom={{ _: 4, lg: 7 }}
+            >
+              {footer}
+            </Text>
+          )}
+
         </Flex>
+
         <Flex
           width={"100%"}
           justifyContent={"space-between"}
           alignItems={"flex-end"}
           flexDirection="row"
         >
-          <Box width={"33%"}>
-            {companyLogoUrl && (
-              <Box paddingBottom={{ _: 42}}>
-                <img src={companyLogoUrl} style={{ maxWidth: '100%'}} alt="" />
-              </Box>
-            )}
-            <Progress
-              duration={itemDurationSeconds}
-              barColor={progressBarColor}
-            />
-          </Box>
+          <Flex
+            width="100%"
+            height="100%"
+            justifyContent="center"
+            alignItems="center"
+          >
+            <Box width={"33%"}>
+              <Progress
+                duration={itemDurationSeconds}
+                barColor={progressBarColor}
+              />
+            </Box>
+          </Flex>
           <QRCode url={item.link} />
         </Flex>
       </Flex>
