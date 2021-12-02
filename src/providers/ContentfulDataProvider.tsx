@@ -77,7 +77,9 @@ export const ContentfulDataProvider: FunctionComponent<Props> = props => {
   const contentFeedQuery = useContentFeedQuery({
     skip: !props.contentFeedId,
     id: props.contentFeedId!,
+    refetchInterval: props.refetchInterval,
   });
+  // console.log(`contentFeedQuery`, contentFeedQuery.data)
 
   const mapping =
     contentFeedQuery.data?.contentFeed?.contentMappingConfig.config;
@@ -92,7 +94,6 @@ export const ContentfulDataProvider: FunctionComponent<Props> = props => {
   const type = mapping?.name as TemplateName | undefined;
 
   const siteConfig = useSiteConfig()
-  console.log(`logo`, siteConfig);
 
   if (!type) return <>{props.children}</>;
 

@@ -138,8 +138,9 @@ export function queryStringFromMappingConfig(config: ContentMappingConfig) {
 export function useContentFeedQuery(options: {
   id: string;
   skip?: boolean;
+  refetchInterval?: number;
 }): UseQueryResult<ContentMappingCollectionResponse, unknown> {
-  const { id, skip } = options;
+  const { id, skip, refetchInterval } = options;
   const key = `${useContentFeedQuery}:${id}`;
   return useGqlQuery<ContentMappingCollectionResponse>(
     ContentFeedGql,
@@ -147,6 +148,7 @@ export function useContentFeedQuery(options: {
       key,
       input: { id },
       skip,
+      refetchInterval,
     }
   );
 }
@@ -224,7 +226,5 @@ function filterContent(
   data: Array<Record<string, any>>,
   filterItems: { sys: { id: string } }[]
 ) {
-  return data.filter((item) =>
-    filterItems.some((filterItem) => filterItem.sys.id === item.sys.id)
-  );
+  return filterItems.map(f => data.find(d => f.sys.id === d.sys.id))
 }
