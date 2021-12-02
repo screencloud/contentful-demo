@@ -12,6 +12,7 @@ import format from "date-fns/format";
 import React, {
   FunctionComponent, useEffect, useState
 } from "react";
+import { customColors } from "../../../custom-theme";
 import { ContentfulBlogItem } from "../../../providers/ContentfulDataProvider";
 import { RichText } from "../../RichText/rich-text";
 
@@ -63,10 +64,21 @@ export const BlogPostRightContent: FunctionComponent<Props> = props => {
       >
         <Flex
           overflow="hidden"
-          flexDirection="row"
-          justifyContent="left"
+          flexDirection="column"
           width="100%"
         >
+          {item.category && (
+            <Text
+              type={TextSizes.H4}
+              color={customColors.lightGray}
+              wordBreak="break-word"
+              fontFamily={"sans-serif"}
+              // fontWeight={theme.fontWeights.black}
+              paddingBottom={{ _: 2, lg: 7 }}
+            >
+              {item.category}
+            </Text>
+          )}
           <Text
             type={TextSizes.H4}
             color={theme.colors.black}

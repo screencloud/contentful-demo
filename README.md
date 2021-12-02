@@ -24,6 +24,8 @@ Please host the app and complete the form in order for the app to be added to yo
 
 https://docs.google.com/forms/d/e/1FAIpQLScBlxBq-1NhQzD1v7FkjDrdLVNTq0FkwJwYgnj_IprRxH2dww/viewform
 
+Schema definition file (which is used by contentful _Schame Connector_ App) is hosted at https://sc-apps-contentful-content-production.s3.eu-west-1.amazonaws.com/public/screencloud-app-definitions.json
+
 ## Packages
 
 This app uses our component library [`@screencloud/alfie-alpha`](https://www.npmjs.com/package/@screencloud/alfie-alpha)
