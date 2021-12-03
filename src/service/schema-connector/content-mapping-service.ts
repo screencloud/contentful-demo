@@ -1,5 +1,4 @@
 import { useEffect, useMemo, useState } from "react";
-import { UseQueryResult } from "react-query";
 import { capitalize } from "../../utils/string-utils";
 import {
   ContentfulCollection,
@@ -139,7 +138,7 @@ export function useContentFeedQuery(options: {
   id: string;
   skip?: boolean;
   refetchInterval?: number;
-}): UseQueryResult<ContentMappingCollectionResponse, unknown> {
+}) {
   const { id, skip, refetchInterval } = options;
   const key = `${useContentFeedQuery}:${id}`;
   return useGqlQuery<ContentMappingCollectionResponse>(

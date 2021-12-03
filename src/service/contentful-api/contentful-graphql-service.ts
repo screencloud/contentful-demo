@@ -36,7 +36,7 @@ export async function gqlRequest<ReturnType>(
 ): Promise<ReturnType> {
   const { preview = false, env } = input;
   const endpoint = getEndpoint({ spaceId, apiKey, env, preview });
-  return await request<ReturnType>(endpoint, query, input);
+  return request<ReturnType>(endpoint, query, input);
 }
 
 type UseGqlQueryOptions<ReturnType> = {

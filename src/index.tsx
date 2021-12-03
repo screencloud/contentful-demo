@@ -34,7 +34,7 @@ ReactDOM.render(
             >
               <ContentfulDataProvider
                 contentFeedId={config?.playlistId}
-                refetchInterval={3000}
+                refetchInterval={13000}
               >
                 <div className="app-container">
                   <App />

@@ -48,7 +48,7 @@ export interface ContentfulHeroItem {
 }
 
 export type TemplateData<TN extends TemplateName, D> = {
-  templateName: TN;
+  templateName?: TN;
   items: D[];
   companyLogo?: string;
 }
@@ -63,7 +63,7 @@ export type ContentfulDataItem =
 
 export const ContentfulDataContext = React.createContext({
   data: undefined as ContentfulDataItem|undefined,
-  loading: false,
+  isLoading: false,
   error: undefined as unknown,
 });
 
@@ -80,28 +80,33 @@ export const ContentfulDataProvider: FunctionComponent<Props> = props => {
     id: props.contentFeedId!,
     refetchInterval: props.refetchInterval,
   });
-  // console.log(`contentFeedQuery`, contentFeedQuery.data)
+  const contentFeed = contentFeedQuery.data?.contentFeed;
 
-  const mapping =
-    contentFeedQuery.data?.contentFeed?.contentMappingConfig.config;
-  const filterItems =
-    contentFeedQuery.data?.contentFeed?.entriesCollection.items;
+  const mappingConfig = contentFeed?.contentMappingConfig.config;
+  const filterItems = contentFeed?.entriesCollection.items;
 
   const {
-    queryResponse: { isLoading, error },
+    queryResponse,
     items = [],
-  } = useMappedData(mapping, { filterItems, refetchInterval: props.refetchInterval });
+  } = useMappedData(
+    mappingConfig, {
+      filterItems,
+      refetchInterval: props.refetchInterval
+    });
 
-  const type = mapping?.name as TemplateName | undefined;
+  const isLoading = contentFeedQuery.isLoading || queryResponse.isLoading;
+  
+  let error: any = contentFeed === null ? `There is no ContentFeed with id "${props.contentFeedId}"` : undefined;
+  if (!error) error = contentFeedQuery.error || queryResponse.error;
+
+  const type = mappingConfig?.name as TemplateName | undefined;
 
   const siteConfig = useSiteConfig()
-
-  if (!type) return <>{props.children}</>;
 
   return (
     <ContentfulDataContext.Provider
       value={{
-        loading: isLoading,
+        isLoading,
         error,
         data: {
           items,

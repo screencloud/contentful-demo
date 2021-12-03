@@ -47,7 +47,7 @@ export const SlideShow = () => {
       !!items?.length && appStarted
     );
 
-    const Comp = data ? components[data.templateName] : undefined;
+    const Comp = data?.templateName ? components[data.templateName] : undefined;
     const item = items?.[currentItemIndex];
     
     return (
