@@ -4,7 +4,6 @@ import {
   ImageAsset, useContentFeedQuery,
   useMappedData
 } from "../service/schema-connector/content-mapping-service";
-import { useSiteConfig } from "../service/use-site-config";
 
 
 type TemplateName =
@@ -100,8 +99,7 @@ export const ContentfulDataProvider: FunctionComponent<Props> = props => {
   if (!error) error = contentFeedQuery.error || queryResponse.error;
 
   const type = mappingConfig?.name as TemplateName | undefined;
-
-  const siteConfig = useSiteConfig()
+  const companyLogo = mappingConfig?.constants?.logoUrl;
 
   return (
     <ContentfulDataContext.Provider
@@ -111,7 +109,7 @@ export const ContentfulDataProvider: FunctionComponent<Props> = props => {
         data: {
           items,
           templateName: type,
-          companyLogo: siteConfig?.logo.url,
+          companyLogo,
         },
       }}
     >

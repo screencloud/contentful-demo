@@ -44,6 +44,12 @@
         "label": "Base URL",
         "type": "string",
         "constant": true
+      },
+      {
+        "name": "logoUrl",
+        "label": "Logo URL",
+        "type": "string",
+        "constant": true
       }
     ]
   },

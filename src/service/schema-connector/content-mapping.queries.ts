@@ -43,8 +43,9 @@ type ContentfulMetadata = {
 };
 
 export type ContentMappingConfig = {
-  constants: {
-    baseUrl: string;
+  constants?: {
+    baseUrl?: string;
+    logoUrl?: string;
   };
   contentfulMetadata: ContentfulMetadata;
   contentType: string;
