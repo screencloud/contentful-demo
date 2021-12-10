@@ -110,7 +110,7 @@ export function queryStringFromMappingConfig(config: ContentMappingConfig, ids?:
     return `${itemsString}${singleItemString} sys { id publishedAt }`;
   }, ``);
 
-  const idsFiler = ids ? ` where: {sys:{id_in:["${ids.join(`","`)}"]}}` : '';
+  const idsFiler = ids?.length ? ` where: {sys:{id_in:["${ids.join(`","`)}"]}}` : '';
 
   const queryString = `query {
     ${contentType}Collection(limit: 20${idsFiler}) {
@@ -203,6 +203,27 @@ export function useMappedData(
       setItems(mappingConfig && contentfulItems ? mapContent(mappingConfig, contentfulItems) : [])
     }
   }, [contentfulItems, itemsLastUpdatedKey, mappingConfig])
+
+  // useEffect(() => {
+  //   if (contentfulItems) {
+  //     console.group(`content mapping`)
+
+  //     console.group(`From mapping config generated query string:`);
+  //     console.log(queryString);
+  //     console.groupEnd();
+
+  //     console.group(`Fetched Contentful items:`);
+  //     console.log(contentfulItems);
+  //     console.groupEnd();
+
+  //     console.group(`Mapped items:`);
+  //     console.log(items);
+  //     console.groupEnd();
+
+  //     console.groupEnd();
+  //   }
+  // // eslint-disable-next-line react-hooks/exhaustive-deps
+  // }, [items]);
   
   return { items, queryResponse: query };
 }
