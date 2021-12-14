@@ -6,7 +6,7 @@ import {
   Text,
   TextSizes,
 } from "@screencloud/alfie-alpha";
-import { ContentfulQuoteItem } from "../../../providers/ContentfulGraphqlDataProvider";
+import { ContentfulQuoteItem } from "../../../providers/ContentfulDataProvider";
 import { RichText } from "../../RichText/rich-text";
 
 interface Props {

@@ -13,7 +13,7 @@ import {
   QRCode,
   Logo,
 } from "@screencloud/alfie-alpha";
-import { ContentfulHeroItem } from "../../../providers/ContentfulGraphqlDataProvider";
+import { ContentfulHeroItem } from "../../../providers/ContentfulDataProvider";
 
 interface Props {
   itemDurationSeconds: number;

@@ -1,11 +1,11 @@
-import React, { ReactElement, FunctionComponent } from "react";
+import React, { FunctionComponent } from "react";
 import {
   theme,
   SplitLayoutContainer,
   FullScreenImage,
 } from "@screencloud/alfie-alpha";
 import { BlogPostRightContent } from "./BlogPostRightContent";
-import { ContentfulBlogItem } from "../../../providers/ContentfulGraphqlDataProvider";
+import { ContentfulBlogItem } from "../../../providers/ContentfulDataProvider";
 
 interface Props {
   itemDurationSeconds: number;
@@ -14,11 +14,13 @@ interface Props {
   progressBarColor?: string;
   themedColor?: string;
   isPortrait: boolean;
+  updatedAt?: string;
 }
 
 export const BlogPostLayout: FunctionComponent<Props> = (
   props: Props
-): ReactElement<Props> => {
+) => {
+  // console.log(`BlogPostLayout()`);
   const {
     itemDurationSeconds,
     companyLogoUrl,

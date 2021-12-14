@@ -1,7 +1,7 @@
-import { useContext } from "react";
 import { request } from "graphql-request";
-import { useQuery } from "react-query";
-import { SCREEN_CLOUD_CTX } from "./screencloud-config/screecloud-ctx";
+import { useContext } from "react";
+import { useQuery, UseQueryOptions } from "react-query";
+import { ContentfulApiContext } from "./contentful-api-ctx";
 
 export type ContentfulCollection<CType> = {
   items: CType[];
@@ -36,35 +36,41 @@ export async function gqlRequest<ReturnType>(
 ): Promise<ReturnType> {
   const { preview = false, env } = input;
   const endpoint = getEndpoint({ spaceId, apiKey, env, preview });
-  return await request<ReturnType>(endpoint, query, input);
+  return request<ReturnType>(endpoint, query, input);
 }
 
-type UseGqlQueryOptions<ReturnType, P> = {
+type UseGqlQueryOptions<ReturnType> = {
   key?: string;
   input?: { id?: string };
-  pipe?: (response: ReturnType) => ReturnType | P | Promise<P>;
+  // pipe?: (response: ReturnType) => ReturnType | P | Promise<P>;
   skip?: boolean;
+  refetchInterval?: UseQueryOptions<ReturnType>['refetchInterval'],
+  isDataEqual?: UseQueryOptions<ReturnType>['isDataEqual'],
 };
 
-export function useGqlQuery<ReturnType, P = ReturnType>(
+export function useGqlQuery<ReturnType = any>(
   query?: string,
-  options?: UseGqlQueryOptions<ReturnType, P>
-): any {
-  const { cfSpaceId, cfApiKey, cfEnv } = useContext(SCREEN_CLOUD_CTX);
-  if (!cfSpaceId || !cfApiKey) {
+  options?: UseGqlQueryOptions<ReturnType>
+) {
+  const { spaceId, apiKey, environment } = useContext(ContentfulApiContext);
+  if (!spaceId || !apiKey) {
     console.warn(
-      `No request can be  executed because there is no spaceId or apiKey provided`
+      `No request can be  executed because there is no spaceId or apiKey provided.`
     );
   }
-  const { key = query, input, skip } = options || {};
+  const { key = query, input, skip, refetchInterval, isDataEqual } = options || {};
 
   return useQuery(
     key || "useGqlQuery",
     () =>
-      gqlRequest<ReturnType>(cfSpaceId || "", cfApiKey || "", query || "", {
-        env: cfEnv,
+      gqlRequest<ReturnType>(spaceId || "", apiKey || "", query || "", {
+        env: environment,
         ...input,
       }).then((response) => response),
-    { enabled: !skip && !!query && !!cfSpaceId && !!cfApiKey }
+    {
+      enabled: !skip && !!query && !!spaceId && !!apiKey,
+      refetchInterval,
+      isDataEqual,
+    }
   );
 }

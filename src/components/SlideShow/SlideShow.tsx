@@ -1,92 +1,65 @@
-import React, { ReactElement, FunctionComponent, useState } from "react";
 import { DEFAULT_ITEM_DELAY_SECONDS } from "@screencloud/alfie-alpha";
+import React, { useState } from "react";
 import useTimeout from "../../hooks/useTimeout";
 import {
-  Blog,
-  Heroes,
-  Products,
-  Quotes,
-  useContentful,
-} from "../../providers/ContentfulGraphqlDataProvider";
+  useContentfulData
+} from "../../providers/ContentfulDataProvider";
+import { useScreenCloudPlayer } from "../../providers/ScreenCloudPlayerProvider";
 import { BlogPostLayout } from "../Layouts/BlogPostLayout/BlogPostLayout";
-import { QuoteLayout } from "../Layouts/QuoteLayout/QuoteLayout";
 import { HeroLayout } from "../Layouts/HeroLayout/HeroLayout";
 import { ProductLayout } from "../Layouts/ProductLayout/ProductLayout";
-import { useScreenCloudPlayer } from "../../providers/ScreenCloudPlayerProvider";
+import { QuoteLayout } from "../Layouts/QuoteLayout/QuoteLayout";
 
-export const SlideShow: FunctionComponent<{}> =
-  (props: {}): ReactElement<{}> => {
-    const [currentItemIndex, setCurrentItemIndex] = useState(0);
+const ITEM_DELAY_SECONDS = DEFAULT_ITEM_DELAY_SECONDS;
 
-    const { data } = useContentful();
+/** Maps TemplateNames to the corresponding render component. */
+const components = {
+  blog: React.memo(BlogPostLayout),
+  quotes: React.memo(QuoteLayout),
+  products: React.memo(HeroLayout),
+  heroes: React.memo(ProductLayout),
+} as const;
 
+export const SlideShow = () => {
+    // console.log(`SlideShow()`);
+    const { data } = useContentfulData();
     const { appStarted } = useScreenCloudPlayer();
 
     const themedColor = "";
-    const companyLogoUrl = "";
+    const companyLogoUrl = data?.companyLogo;
     const isPortrait = false;
+    const items = data?.items;
+
+    const [currentItemIndex, setCurrentItemIndex] = useState(0);
 
     // Loop over each item in feed, once all items have been displayed loop back to the start
     useTimeout(
       () => {
-        if (data) {
-          if (currentItemIndex === data?.items.length - 1) {
+        if (items) {
+          if (currentItemIndex === items.length - 1) {
             setCurrentItemIndex(0);
           } else {
             setCurrentItemIndex(currentItemIndex + 1);
           }
         }
       },
-      DEFAULT_ITEM_DELAY_SECONDS * 1000,
-      data && data?.items.length > 0 && appStarted
+      ITEM_DELAY_SECONDS * 1000,
+      !!items?.length && appStarted
     );
 
-    if (!data || data.items.length === 0) {
-      return <></>;
-    }
-
-    switch (data.type) {
-      case Blog:
-        return (
-          <BlogPostLayout
-            itemDurationSeconds={DEFAULT_ITEM_DELAY_SECONDS}
-            item={data.items[currentItemIndex]}
-            isPortrait={isPortrait}
-            companyLogoUrl={companyLogoUrl}
-            themedColor={themedColor}
-          />
-        );
-      case Quotes:
-        return (
-          <QuoteLayout
-            itemDurationSeconds={DEFAULT_ITEM_DELAY_SECONDS}
-            item={data.items[currentItemIndex]}
-            isPortrait={isPortrait}
-            companyLogoUrl={companyLogoUrl}
-            themedColor={themedColor}
-          />
-        );
-      case Heroes:
-        return (
-          <HeroLayout
-            itemDurationSeconds={DEFAULT_ITEM_DELAY_SECONDS}
-            item={data.items[currentItemIndex]}
-            isPortrait={isPortrait}
-            companyLogoUrl={companyLogoUrl}
-            themedColor={themedColor}
-          />
-        );
-      case Products:
-        return (
-          <ProductLayout
-            itemDurationSeconds={DEFAULT_ITEM_DELAY_SECONDS}
-            item={data.items[currentItemIndex]}
-            isPortrait={isPortrait}
-            companyLogoUrl={companyLogoUrl}
-            themedColor={themedColor}
-          />
-        );
-      default:
-        return <></>;
-    }
+    const Comp = data?.templateName ? components[data.templateName] : undefined;
+    const item = items?.[currentItemIndex];
+    
+    return (
+      item && Comp ? (
+        <Comp
+          itemDurationSeconds={ITEM_DELAY_SECONDS}
+          item={item as any}
+          isPortrait={isPortrait}
+          companyLogoUrl={companyLogoUrl}
+          themedColor={themedColor}
+        />
+      )
+      : <></>
+    )
   };

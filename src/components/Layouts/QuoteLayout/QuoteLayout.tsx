@@ -5,7 +5,7 @@ import {
   FullScreenImage,
 } from "@screencloud/alfie-alpha";
 import { QuoteRightContent } from "./QuoteRightContent";
-import { ContentfulQuoteItem } from "../../../providers/ContentfulGraphqlDataProvider";
+import { ContentfulQuoteItem } from "../../../providers/ContentfulDataProvider";
 
 interface Props {
   itemDurationSeconds: number;

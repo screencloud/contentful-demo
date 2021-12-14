@@ -6,10 +6,12 @@ import {
   ScreenCloudPlayerContext,
   ScreenCloudPlayerProvider,
 } from "./providers/ScreenCloudPlayerProvider";
-import { ContentfulGraphqlDataProvider } from "./providers/ContentfulGraphqlDataProvider";
+import { ContentfulDataProvider } from "./providers/ContentfulDataProvider";
 import { config as devConfig } from "./config.development";
 import reportWebVitals from "./reportWebVitals";
 import * as serviceWorkerRegistration from "./serviceWorkerRegistration";
+import { QueryClient, QueryClientProvider } from "react-query";
+import { ContentfulApiContext } from "./service/contentful-api/contentful-api-ctx";
 
 /* 
 LAYOUTS
@@ -19,21 +21,27 @@ LAYOUTS
  - blog
 */
 
+const queryClient = new QueryClient();
+
 ReactDOM.render(
   <React.StrictMode>
     <ScreenCloudPlayerProvider testData={devConfig}>
       <ScreenCloudPlayerContext.Consumer>
         {({ config }) => (
-          <ContentfulGraphqlDataProvider
-            apiKey={config?.apiKey}
-            spaceId={config?.spaceId}
-            mapName={config?.mapName}
-            playlistId={config?.playlistId}
-          >
-            <div className="app-container">
-              <App />
-            </div>
-          </ContentfulGraphqlDataProvider>
+          <QueryClientProvider client={queryClient}>
+            <ContentfulApiContext.Provider
+              value={{ apiKey: config?.apiKey, spaceId: config?.spaceId }}
+            >
+              <ContentfulDataProvider
+                contentFeedId={config?.playlistId}
+                refetchInterval={13000}
+              >
+                <div className="app-container">
+                  <App />
+                </div>
+              </ContentfulDataProvider>
+            </ContentfulApiContext.Provider>
+          </QueryClientProvider>
         )}
       </ScreenCloudPlayerContext.Consumer>
     </ScreenCloudPlayerProvider>

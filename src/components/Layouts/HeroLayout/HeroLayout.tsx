@@ -5,7 +5,7 @@ import {
   FullScreenImage,
 } from "@screencloud/alfie-alpha";
 import { HeroRightContent } from "./HeroRightContent";
-import { ContentfulHeroItem } from "../../../providers/ContentfulGraphqlDataProvider";
+import { ContentfulHeroItem } from "../../../providers/ContentfulDataProvider";
 
 interface Props {
   itemDurationSeconds: number;

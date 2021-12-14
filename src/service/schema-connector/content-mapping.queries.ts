@@ -1,7 +1,7 @@
 import { gql } from "graphql-request";
 
-export const scContentMappingByNameGql = gql`
-  query ScreenCloudConfig($id: String!) {
+export const ContentFeedGql = gql`
+  query ContentFeed($id: String!) {
     contentFeed(id: $id) {
       contentMappingConfig {
         name
@@ -18,7 +18,7 @@ export const scContentMappingByNameGql = gql`
   }
 `;
 
-export type ScAppMapping = {
+export type ContentTypeMapping = {
   contentType: string;
   mapping: Record<string, string>;
 };
@@ -42,9 +42,10 @@ type ContentfulMetadata = {
   };
 };
 
-export type ScreenCloudContentMapping = {
-  constants: {
-    baseUrl: string;
+export type ContentMappingConfig = {
+  constants?: {
+    baseUrl?: string;
+    logoUrl?: string;
   };
   contentfulMetadata: ContentfulMetadata;
   contentType: string;
@@ -53,14 +54,14 @@ export type ScreenCloudContentMapping = {
   sys: Sys;
 };
 
-export type ScContentMappingItem = {
+export type ContentMappingItem = {
   id: string;
-  config: ScreenCloudContentMapping;
+  config: ContentMappingConfig;
 };
 
-export type ScContentMappingCollectionResponse = {
+export type ContentMappingCollectionResponse = {
   contentFeed: {
-    contentMappingConfig: ScContentMappingItem;
+    contentMappingConfig: ContentMappingItem;
     entriesCollection: {
       items: { sys: { id: string } }[];
     };
