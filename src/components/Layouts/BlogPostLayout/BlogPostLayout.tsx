@@ -40,7 +40,7 @@ export const BlogPostLayout: FunctionComponent<Props> = (
       borderColor={themeColor}
       leftContent={
         <FullScreenImage
-          url={item.image?.url || ""}
+          url={item.image?.url ? `${item.image?.url}?w=2048` : ""}
           itemDurationSeconds={itemDurationSeconds}
         />
       }
