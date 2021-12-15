@@ -1,5 +1,4 @@
 import { useEffect, useMemo, useState } from "react";
-import { capitalize } from "../../utils/string-utils";
 import {
   ContentfulCollection,
   useGqlQuery
@@ -33,7 +32,6 @@ export interface ImageAsset {
 export function mapContent(
   mappingConfig: ContentMappingConfig,
   data: Array<Record<string, any>>,
-  // filterItems?: { sys: { id: string } }[],
 ): any[] {
   return data.map((dataItem) => {
     const mappingEntries = Object.entries(mappingConfig.mapping || {});
@@ -67,7 +65,7 @@ export function mapContent(
 /**
  * @returns Generates a GraphQL queryString which can be used to call the
  */
-export function queryStringFromMappingConfig(config: ContentMappingConfig) {
+export function queryStringFromMappingConfig(config: ContentMappingConfig, ids?: string[]) {
   const { contentType, mapping } = config;
   const entries = Object.entries(mapping);
 
@@ -112,9 +110,10 @@ export function queryStringFromMappingConfig(config: ContentMappingConfig) {
     return `${itemsString}${singleItemString} sys { id publishedAt }`;
   }, ``);
 
+  const idsFiler = ids?.length ? ` where: {sys:{id_in:["${ids.join(`","`)}"]}}` : '';
 
   const queryString = `query {
-    ${contentType}Collection(limit: 20) {
+    ${contentType}Collection(limit: 20${idsFiler}) {
       items {
         ${itemsQueryString}
       }
@@ -134,6 +133,11 @@ export function queryStringFromMappingConfig(config: ContentMappingConfig) {
   return queryString;
 }
 
+/**
+ * Simple graphql react query to get a contentFeed item from contentful.
+ * @param options contentFeed id is required
+ * @returns 
+ */
 export function useContentFeedQuery(options: {
   id: string;
   skip?: boolean;
@@ -170,7 +174,7 @@ export function useMappedData(
   const { filterItems, refetchInterval} = options || {};
 
   const queryString = mappingConfig
-    ? queryStringFromMappingConfig(mappingConfig)
+    ? queryStringFromMappingConfig(mappingConfig, filterItems?.map(item => item.sys.id))
     : undefined;
 
   const query =
@@ -179,16 +183,7 @@ export function useMappedData(
       { refetchInterval },
     );
 
-    /** Items (filtered by Ids) returned by contentful. */
-  const contentfulItems = useMemo(() => {
-    if (!mappingConfig) {
-      return undefined;
-    }
-    const items =
-      query.data?.[`${mappingConfig.contentType}Collection`].items;
-
-    return items && filterItems ? filterContent(items, filterItems) : items
-  }, [mappingConfig, filterItems, query.data]);
+  const contentfulItems = mappingConfig ? query.data?.[`${mappingConfig.contentType}Collection`].items : undefined;
 
   /** Items already mapped, which are returned by this hook in the end. */
   const [items, setItems] = useState(mappingConfig && contentfulItems ? mapContent(mappingConfig, contentfulItems) : []);
@@ -208,6 +203,27 @@ export function useMappedData(
       setItems(mappingConfig && contentfulItems ? mapContent(mappingConfig, contentfulItems) : [])
     }
   }, [contentfulItems, itemsLastUpdatedKey, mappingConfig])
+
+  // useEffect(() => {
+  //   if (contentfulItems) {
+  //     console.group(`content mapping`)
+
+  //     console.group(`From mapping config generated query string:`);
+  //     console.log(queryString);
+  //     console.groupEnd();
+
+  //     console.group(`Fetched Contentful items:`);
+  //     console.log(contentfulItems);
+  //     console.groupEnd();
+
+  //     console.group(`Mapped items:`);
+  //     console.log(items);
+  //     console.groupEnd();
+
+  //     console.groupEnd();
+  //   }
+  // // eslint-disable-next-line react-hooks/exhaustive-deps
+  // }, [items]);
   
   return { items, queryResponse: query };
 }
@@ -221,9 +237,5 @@ function mapLink(baseUrl?: string, slug?: string) {
   return { link: `${baseUrl}/${slug}` };
 }
 
-function filterContent(
-  data: Array<Record<string, any>>,
-  filterItems: { sys: { id: string } }[]
-) {
-  return filterItems.map(f => data.find(d => f.sys.id === d.sys.id))
-}
+export const capitalize = (str: string): string =>
+  `${str.substring(0, 1).toUpperCase()}${str.substring(1)}`;

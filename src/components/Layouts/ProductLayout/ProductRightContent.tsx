@@ -64,15 +64,17 @@ export const ProductRightContent: FunctionComponent<Props> = (
           justifyContent="left"
           width="100%"
         >
-          <Text
-            type={TextSizes.H1}
-            color="#2d313b"
-            wordBreak="break-word"
-            fontFamily={theme.fonts.normal}
-            fontWeight={theme.fontWeights.bold}
-          >
-            {item.name.toUpperCase()}
-          </Text>
+          {item.name && (
+            <Text
+              type={TextSizes.H1}
+              color="#2d313b"
+              wordBreak="break-word"
+              fontFamily={theme.fonts.normal}
+              fontWeight={theme.fontWeights.bold}
+            >
+              {item.name.toUpperCase()}
+            </Text>
+          )}
         </Flex>
 
         <Flex

@@ -80,16 +80,23 @@ export const ContentfulDataProvider: FunctionComponent<Props> = props => {
     refetchInterval: props.refetchInterval,
   });
   const contentFeed = contentFeedQuery.data?.contentFeed;
+  // useEffect(() => {
+  //   if (contentFeed) {
+  //     console.group(`Contentful Content feed`);
+  //     console.log(contentFeed);
+  //     console.groupEnd();
+  //   }
+  // }, [contentFeed])
 
   const mappingConfig = contentFeed?.contentMappingConfig.config;
-  const filterItems = contentFeed?.entriesCollection.items;
+  const itemIds = contentFeed?.entriesCollection.items;
 
   const {
     queryResponse,
     items = [],
   } = useMappedData(
     mappingConfig, {
-      filterItems,
+      filterItems: itemIds,
       refetchInterval: props.refetchInterval
     });
 
@@ -98,7 +105,7 @@ export const ContentfulDataProvider: FunctionComponent<Props> = props => {
   let error: any = contentFeed === null ? `There is no ContentFeed with id "${props.contentFeedId}"` : undefined;
   if (!error) error = contentFeedQuery.error || queryResponse.error;
 
-  const type = mappingConfig?.name as TemplateName | undefined;
+  const templateName = mappingConfig?.name as TemplateName | undefined;
   const companyLogo = mappingConfig?.constants?.logoUrl;
 
   return (
@@ -108,7 +115,7 @@ export const ContentfulDataProvider: FunctionComponent<Props> = props => {
         error,
         data: {
           items,
-          templateName: type,
+          templateName,
           companyLogo,
         },
       }}

@@ -16,8 +16,8 @@ const ITEM_DELAY_SECONDS = DEFAULT_ITEM_DELAY_SECONDS;
 const components = {
   blog: React.memo(BlogPostLayout),
   quotes: React.memo(QuoteLayout),
-  products: React.memo(HeroLayout),
-  heroes: React.memo(ProductLayout),
+  products: React.memo(ProductLayout),
+  heroes: React.memo(HeroLayout),
 } as const;
 
 export const SlideShow = () => {
