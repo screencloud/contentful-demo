@@ -1,5 +1,5 @@
 import { DEFAULT_ITEM_DELAY_SECONDS } from "@screencloud/alfie-alpha";
-import React, { useState } from "react";
+import React, { useMemo, useState } from "react";
 import useTimeout from "../../hooks/useTimeout";
 import {
   useContentfulData
@@ -29,6 +29,46 @@ export const SlideShow = () => {
     const companyLogoUrl = data?.companyLogo;
     const isPortrait = false;
     const items = data?.items;
+    
+    /** All image urls of items[] (for preloading). */
+    const imgSrcs = useMemo(() => (
+      data?.assetFieldNames.reduce((keys, assetKey) => {
+        if (!Array.isArray(items))
+          return [];
+        
+        const itemImageFileNames = (items as any[]).reduce((collection, item) => {
+          const fileName = item[assetKey]?.fileName;
+          if (!fileName)
+            return collection;
+          
+          const fileExt = String(fileName).toLowerCase().split(`.`).pop();
+          if (!fileExt)
+            return collection;
+          
+          if (fileExt && ['jpg', 'jpeg'].includes(fileExt)) {
+            return [...collection, fileName];
+          }
+          return collection;
+          
+        }, [] as any[])
+  
+        return [...keys, ...itemImageFileNames];
+        
+        // Object.entries(items).reduce((itemImgSrcs, [itemKey, itemValue]) => (
+        //   itemValue
+        // ), [] as string[])
+      }, [] as string [])
+    ), [data?.assetFieldNames, items])
+
+    /** preloading all imare sources */
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const preloadedImages = useMemo(() => (
+      imgSrcs?.map(src => {
+        const image = new Image();
+        image.src = src;
+        return image;
+      })
+    ), [imgSrcs])
 
     const [currentItemIndex, setCurrentItemIndex] = useState(0);
 

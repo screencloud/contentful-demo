@@ -1,5 +1,5 @@
 import * as types from "@contentful/rich-text-types";
-import React, { FunctionComponent, useContext } from "react";
+import React, { FunctionComponent, useContext, useMemo } from "react";
 import {
   ImageAsset, useContentFeedQuery,
   useMappedData
@@ -50,6 +50,7 @@ export type TemplateData<TN extends TemplateName, D> = {
   templateName?: TN;
   items: D[];
   companyLogo?: string;
+  assetFieldNames: string[];
 }
 
 export type ContentfulDataItem =
@@ -91,6 +92,14 @@ export const ContentfulDataProvider: FunctionComponent<Props> = props => {
   const mappingConfig = contentFeed?.contentMappingConfig.config;
   const itemIds = contentFeed?.entriesCollection.items;
 
+  const assetFieldNames = useMemo(() => {
+    if (!mappingConfig?.mapping)
+      return [];
+    return getAssetKeysFromMapping(mappingConfig.mapping);
+  }, [mappingConfig?.mapping])
+
+
+  
   const {
     queryResponse,
     items = [],
@@ -117,6 +126,7 @@ export const ContentfulDataProvider: FunctionComponent<Props> = props => {
           items,
           templateName,
           companyLogo,
+          assetFieldNames,
         },
       }}
     >
@@ -124,5 +134,15 @@ export const ContentfulDataProvider: FunctionComponent<Props> = props => {
     </ContentfulDataContext.Provider>
   );
 };
+
+
+function getAssetKeysFromMapping(mapping: Record<string, string>) {
+  return Object.entries(mapping).reduce(
+    (assetFields, [key, value]) => (
+      value.split(':').pop() === 'Asset' ? [...assetFields, key] : assetFields
+    ),
+    [] as string[]
+  )
+}
 
 export const useContentfulData = () => useContext(ContentfulDataContext);
