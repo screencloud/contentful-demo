@@ -157,7 +157,9 @@ export const BlogPostRightContent: FunctionComponent<Props> = props => {
               />
             </Box>
           </Flex>
-          <QRCode url={item.link} />
+          {item.link && (
+            <QRCode url={item.link} />
+          )}
         </Flex>
       </Flex>
     </ContentWrapper>
