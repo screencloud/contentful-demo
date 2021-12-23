@@ -187,12 +187,11 @@ export function useMappedData(
 
   /** Items already mapped, which are returned by this hook in the end. */
   const [items, setItems] = useState(mappingConfig && contentfulItems ? mapContent(mappingConfig, contentfulItems) : []);
-
+  
   /** get a key which changes when a content item was changed in the backend. */
   const itemsLastUpdatedKey = useMemo(() => (
-    contentfulItems?.map(item => item.publishedAt).join(',')
+    contentfulItems?.map(item => item.sys?.publishedAt).join(',')
   ), [contentfulItems])
-
 
   /**
    * only when `itemsLastUpdatedKey ` changed we map and update our items.
